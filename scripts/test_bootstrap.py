@@ -43,6 +43,7 @@ class BootstrapTests(unittest.TestCase):
             self.assertTrue(config_path.exists())
             config_text = config_path.read_text(encoding='utf-8')
             self.assertIn('package_name = "DemoBlueprint"', config_text)
+            self.assertIn('blueprint_main = "BlueprintMain"', config_text)
             self.assertIn('chapter_root = "DemoBlueprint/Chapters"', config_text)
 
             check = subprocess.run(

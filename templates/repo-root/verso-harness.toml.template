@@ -1,4 +1,5 @@
 package_name = "__PACKAGE_NAME__"
+blueprint_main = "BlueprintMain"
 chapter_root = "__PACKAGE_NAME__/Chapters"
 tex_source_glob = "__TEX_SOURCE_GLOB__"
 

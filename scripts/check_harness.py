@@ -49,7 +49,6 @@ def main() -> int:
         Path(CONFIG_FILENAME),
         Path("lakefile.lean"),
         Path("lean-toolchain"),
-        Path("BlueprintMain.lean"),
         Path("scripts/ci-pages.sh"),
         Path(".github/workflows/blueprint.yml"),
     ]
@@ -76,6 +75,7 @@ def main() -> int:
             )
 
         for relative in [
+            Path(f"{config.blueprint_main}.lean"),
             Path(f"{config.package_name}.lean"),
             Path(config.package_name) / "TeXPrelude.lean",
             Path(config.chapter_root) / "Introduction.lean",
@@ -103,6 +103,7 @@ def main() -> int:
     if config is not None:
         placeholder_targets.extend(
             [
+                Path(f"{config.blueprint_main}.lean"),
                 Path(f"{config.package_name}.lean"),
                 Path(config.package_name) / "TeXPrelude.lean",
                 Path(config.chapter_root) / "Introduction.lean",

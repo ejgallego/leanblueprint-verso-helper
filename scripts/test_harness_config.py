@@ -19,6 +19,7 @@ def write_config(root: Path, *, chapter_root: str = 'DemoBlueprint/Chapters') ->
         '\n'.join(
             [
                 'package_name = "DemoBlueprint"',
+                'blueprint_main = "BlueprintMain"',
                 f'chapter_root = "{chapter_root}"',
                 'tex_source_glob = "./blueprint/src/chapter/*.tex"',
                 '',

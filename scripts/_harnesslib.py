@@ -15,6 +15,7 @@ PACKAGE_PATTERN = re.compile(r"^\s*package\s+([A-Za-z_][A-Za-z0-9_]*)\s+where", 
 @dataclass(frozen=True)
 class HarnessConfig:
     package_name: str
+    blueprint_main: str
     chapter_root: str
     tex_source_glob: str
     lt_default_chapters: tuple[str, ...]
@@ -83,6 +84,7 @@ def load_config(project_root: Path) -> HarnessConfig:
         raise SystemExit(f"{CONFIG_FILENAME}: expected a top-level table")
 
     package_name = require_string(data, "package_name", "package_name")
+    blueprint_main = require_string(data, "blueprint_main", "blueprint_main")
     chapter_root = require_relative_path(
         require_string(data, "chapter_root", "chapter_root"),
         "chapter_root",
@@ -130,6 +132,7 @@ def load_config(project_root: Path) -> HarnessConfig:
 
     return HarnessConfig(
         package_name=package_name,
+        blueprint_main=blueprint_main,
         chapter_root=chapter_root,
         tex_source_glob=tex_source_glob,
         lt_default_chapters=lt_default_chapters,
