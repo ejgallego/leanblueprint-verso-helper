@@ -1,7 +1,7 @@
-# TeX Blueprint To Verso Harness
+# Leanblueprint To Verso Harness
 
 Use this repository as a local submodule inside a Lean project that is porting,
-maintaining, or retrofitting a TeX blueprint to a `verso-blueprint` harness.
+maintaining, or retrofitting a `leanblueprint` or TeX blueprint to a `verso-blueprint` harness.
 
 The helper assumes the current LT-first workflow: preserve theorem order,
 section order, paragraph boundaries, and dependency edges from the legacy
@@ -15,10 +15,12 @@ Every helper-managed repo must carry a root `verso-harness.toml`. The helper
 reads package layout, chapter scope, and LT defaults from that file and does
 not guess repo structure.
 
+Canonical repository name: `leanblueprint-to-verso`.
+
 ## Add The Helper
 
 ```bash
-git submodule add <helper-repo-url> tools/verso-harness
+git submodule add git@github.com:ejgallego/leanblueprint-to-verso.git tools/verso-harness
 ```
 
 Recommended host-side `AGENTS.md` wiring lives in
@@ -83,6 +85,7 @@ Then run the LT audit stack on the chapters being reworked:
 ```bash
 python3 tools/verso-harness/scripts/check_lt_source_pairs.py --project-root . path/to/Chapter.lean
 python3 tools/verso-harness/scripts/check_lt_similarity.py --project-root . path/to/Chapter.lean
+python3 tools/verso-harness/scripts/check_source_label_grounding.py --project-root . path/to/Chapter.lean
 python3 tools/verso-harness/scripts/lt_audit.py --project-root . path/to/Chapter.lean
 ```
 

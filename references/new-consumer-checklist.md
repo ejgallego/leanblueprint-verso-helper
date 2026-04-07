@@ -1,12 +1,14 @@
 # New Consumer Checklist
 
+Canonical helper repository: `leanblueprint-to-verso`.
+
 Use this checklist when adopting the helper in a fresh or newly-retrofitted
 consumer repository.
 
 ## 1. Add The Helper
 
 ```bash
-git submodule add <helper-repo-url> tools/verso-harness
+git submodule add git@github.com:ejgallego/leanblueprint-to-verso.git tools/verso-harness
 ```
 
 ## 2. Create The Root Harness Config
@@ -69,7 +71,31 @@ Do not proceed with LT audit or chapter work until this passes.
 Pull the guidance from `tools/verso-harness/snippets/AGENTS.host.md` into the
 consumer repo's `AGENTS.md`.
 
-## 6. Port And Audit Direct-Port Chapters
+## 6. Start The Port With A Concrete Prompt
+
+For a regular blueprint repository, start the port with a concrete request like:
+
+```text
+Use tools/verso-harness and the repo root verso-harness.toml.
+Treat the legacy TeX / leanblueprint source as read-only source of truth.
+Start a faithful LT pass on the first unchecked chapter in lt.default_chapters.
+Do not rewrite the prose for style.
+Add adjacent tex witnesses for every translated informal block.
+After the edit, run check_lt_source_pairs.py, check_lt_similarity.py, and check_source_label_grounding.py on the touched chapter.
+Record any deliberate non-literal deviations.
+```
+
+Use a chapter-specific variant once the first pass is underway:
+
+```text
+Use tools/verso-harness and verso-harness.toml.
+Continue the LT pass on <chapter>.lean only.
+Preserve source order and local claim order.
+Do not invent new dependency edges or placeholder Lean declarations.
+Run the helper LT audit stack on that chapter before stopping.
+```
+
+## 7. Port And Audit Direct-Port Chapters
 
 For each touched direct-port chapter, run:
 
@@ -85,13 +111,13 @@ Use the one-shot combined command when useful:
 python3 tools/verso-harness/scripts/lt_audit.py --project-root . path/to/Chapter.lean
 ```
 
-## 7. Run The Site Smoke Test
+## 8. Run The Site Smoke Test
 
 ```bash
 bash ./scripts/ci-pages.sh
 ```
 
-## 8. Keep Ownership Clear
+## 9. Keep Ownership Clear
 
 Helper-owned and safe to refresh mechanically:
 

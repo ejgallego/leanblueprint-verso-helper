@@ -1,4 +1,4 @@
-# TeX Blueprint To Verso Harness Notes
+# Leanblueprint To Verso Harness Notes
 
 - This repo uses the local helper at `tools/verso-harness`.
 - Keep a root `verso-harness.toml` checked in and treat it as the source of

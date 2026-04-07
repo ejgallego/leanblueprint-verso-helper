@@ -1,7 +1,7 @@
-# TeX Blueprint To Verso Harness
+# Leanblueprint To Verso Harness
 
 This repository is a reusable helper intended to be added as a submodule inside
-a host Lean project that is porting a TeX blueprint or `leanblueprint` source to
+a host Lean project that is porting a `leanblueprint` or TeX blueprint source to
 `verso-blueprint`, or updating an older Verso harness to the current LT method.
 
 ## Scope
