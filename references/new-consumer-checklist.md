@@ -21,7 +21,8 @@ git submodule add git@github.com:ejgallego/leanblueprint-to-verso.git tools/vers
 ## 3. Create The Root Harness Config
 
 Every helper-managed repo must carry a checked-in `verso-harness.toml` at repo
-root.
+root. The repo root `lean-toolchain` must match the upstream formalization's
+`lean-toolchain`.
 
 Minimum required fields:
 
@@ -43,6 +44,9 @@ non_port_chapters = [
 ```
 
 Use explicit chapter paths. Do not rely on helper-side discovery heuristics.
+For new ports, do not choose the Lean toolchain independently: the upstream
+formalization is authoritative, and the helper should choose the matching
+`VersoBlueprint` branch `lean-<release>`.
 
 ## 4. Validate The Harness Shape
 

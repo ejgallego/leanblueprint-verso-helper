@@ -53,8 +53,8 @@ Review the helper templates and port the relevant changes manually into:
 
 For older projects, the main alignment points are usually:
 
-- the current `VersoBlueprint` dependency source and ref
-- the current Lean toolchain baseline
+- the upstream formalization's current `lean-toolchain`
+- the matching `VersoBlueprint` branch `lean-<release>`
 - one shared `TeXPrelude.lean`
 - one coherent root blueprint package at the host root
 

@@ -47,11 +47,13 @@ python3 tools/verso-harness/scripts/start_new_port.py \
 
 After the script finishes:
 
-1. review `verso-harness.toml`
-2. set `lt.default_chapters` explicitly
-3. run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`
-4. copy `tools/verso-harness/snippets/AGENTS.host.md` into `AGENTS.md`
-5. start the first LT chapter pass
+1. confirm that `lean-toolchain` at repo root matches the upstream formalization
+2. confirm that `lakefile.lean` points to the matching `VersoBlueprint` branch `lean-<release>`
+3. review `verso-harness.toml`
+4. set `lt.default_chapters` explicitly
+5. run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`
+6. copy `tools/verso-harness/snippets/AGENTS.host.md` into `AGENTS.md`
+7. start the first LT chapter pass
 
 ## Start-Port Prompt
 

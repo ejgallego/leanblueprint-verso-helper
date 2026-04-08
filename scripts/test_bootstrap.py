@@ -13,9 +13,13 @@ ROOT = SCRIPT_DIR.parent
 
 
 class BootstrapTests(unittest.TestCase):
-    def test_bootstrap_writes_required_config_and_passes_harness_check(self) -> None:
+    def test_bootstrap_uses_upstream_toolchain_and_matching_verso_branch(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / 'demo-project'
+            demo = root / 'Demo'
+            demo.mkdir(parents=True)
+            (demo / 'lean-toolchain').write_text('leanprover/lean4:v4.28.0\n', encoding='utf-8')
+
             result = subprocess.run(
                 [
                     sys.executable,
@@ -39,12 +43,18 @@ class BootstrapTests(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+            self.assertIn('lean-toolchain: leanprover/lean4:v4.28.0', result.stdout)
+            self.assertIn('VersoBlueprint ref: lean-v4.28.0', result.stdout)
+
+            self.assertEqual(
+                (root / 'lean-toolchain').read_text(encoding='utf-8').strip(),
+                'leanprover/lean4:v4.28.0',
+            )
+            lakefile = (root / 'lakefile.lean').read_text(encoding='utf-8')
+            self.assertIn('@ "lean-v4.28.0"', lakefile)
+
             config_path = root / 'verso-harness.toml'
             self.assertTrue(config_path.exists())
-            config_text = config_path.read_text(encoding='utf-8')
-            self.assertIn('package_name = "DemoBlueprint"', config_text)
-            self.assertIn('blueprint_main = "BlueprintMain"', config_text)
-            self.assertIn('chapter_root = "DemoBlueprint/Chapters"', config_text)
 
             check = subprocess.run(
                 [

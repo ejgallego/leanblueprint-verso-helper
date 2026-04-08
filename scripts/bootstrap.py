@@ -28,11 +28,20 @@ def parse_args() -> argparse.Namespace:
         help="Glob-like description of the TeX chapter sources in the host repo.",
     )
     parser.add_argument(
-        "--lean-toolchain", default="leanprover/lean4:v4.28.0"
+        "--lean-toolchain",
+        default=None,
+        help=(
+            "Optional override for compatibility work only. By default the helper reads "
+            "<formalization-path>/lean-toolchain and uses that exact value."
+        ),
     )
     parser.add_argument(
         "--verso-blueprint-ref",
-        default="lean-v4.28.0",
+        default=None,
+        help=(
+            "Optional override for compatibility work only. By default the helper selects "
+            "the matching VersoBlueprint branch for the chosen Lean toolchain."
+        ),
     )
     parser.add_argument(
         "--force",
@@ -73,6 +82,39 @@ def ensure_executable(path: Path) -> None:
     path.chmod(mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
+def extract_lean_release(lean_toolchain: str) -> str:
+    value = lean_toolchain.strip()
+    return value.rsplit(":", 1)[-1] if ":" in value else value
+
+
+def default_verso_blueprint_ref(lean_toolchain: str) -> str:
+    return f"lean-{extract_lean_release(lean_toolchain)}"
+
+
+def read_formalization_toolchain(project_root: Path, formalization_path: str) -> str:
+    toolchain_path = project_root / formalization_path / "lean-toolchain"
+    if not toolchain_path.exists():
+        raise SystemExit(
+            f"missing upstream lean-toolchain at {toolchain_path}; the upstream formalization "
+            "determines the consumer toolchain"
+        )
+    value = toolchain_path.read_text(encoding="utf-8").strip()
+    if not value:
+        raise SystemExit(f"empty upstream lean-toolchain at {toolchain_path}")
+    return value
+
+
+def resolve_harness_versions(args: argparse.Namespace, project_root: Path) -> tuple[str, str]:
+    lean_toolchain = args.lean_toolchain or read_formalization_toolchain(
+        project_root,
+        args.formalization_path,
+    )
+    verso_blueprint_ref = args.verso_blueprint_ref or default_verso_blueprint_ref(
+        lean_toolchain
+    )
+    return lean_toolchain, verso_blueprint_ref
+
+
 def main() -> int:
     args = parse_args()
     validate_identifier(args.package_name, "--package-name")
@@ -81,6 +123,7 @@ def main() -> int:
     helper_root = Path(__file__).resolve().parents[1]
     template_root = helper_root / "templates" / "repo-root"
     project_root = args.project_root.resolve()
+    lean_toolchain, verso_blueprint_ref = resolve_harness_versions(args, project_root)
 
     replacements = {
         "__PACKAGE_NAME__": args.package_name,
@@ -88,8 +131,8 @@ def main() -> int:
         "__FORMALIZATION_NAME__": args.formalization_name,
         "__FORMALIZATION_PATH__": args.formalization_path,
         "__TEX_SOURCE_GLOB__": args.tex_source_glob,
-        "__LEAN_TOOLCHAIN__": args.lean_toolchain,
-        "__VERSO_BLUEPRINT_REF__": args.verso_blueprint_ref,
+        "__LEAN_TOOLCHAIN__": lean_toolchain,
+        "__VERSO_BLUEPRINT_REF__": verso_blueprint_ref,
     }
 
     written: list[Path] = []
@@ -116,6 +159,9 @@ def main() -> int:
         written.append(relative_target)
 
     print(f"project root: {project_root}")
+    print(f"formalization path: {args.formalization_path}")
+    print(f"lean-toolchain: {lean_toolchain}")
+    print(f"VersoBlueprint ref: {verso_blueprint_ref}")
     print(f"written: {len(written)}")
     for path in written:
         print(f"  write {path}")

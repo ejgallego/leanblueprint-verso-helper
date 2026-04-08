@@ -62,14 +62,16 @@ manually into the project-owned files.
 
 ## Updating The Toolchain Or Dependencies
 
-Treat toolchain bumps carefully:
+The upstream formalization determines the Lean toolchain. In a consumer repo:
 
-- first update `lean-toolchain`
-- then update dependency refs in `lakefile.lean`
+- first update the upstream formalization to the desired revision
+- then copy or confirm the same value in the root `lean-toolchain`
+- then update the `VersoBlueprint` ref in `lakefile.lean` to the matching branch `lean-<release>`
 - then refresh caches or rebuild as needed
 - then repair any import or syntax fallout in the blueprint modules
 
-Do not bundle unrelated blueprint prose edits into a dependency-upgrade change.
+Do not bundle unrelated blueprint prose edits into a dependency-upgrade change,
+and do not bump the consumer toolchain independently of upstream.
 
 ## Bringing An Older Harness Up To Date
 

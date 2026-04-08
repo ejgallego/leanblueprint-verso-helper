@@ -31,14 +31,6 @@ def parse_args() -> argparse.Namespace:
         help="Glob-like description of the TeX chapter sources in the upstream repo.",
     )
     parser.add_argument(
-        "--lean-toolchain",
-        default="leanprover/lean4:v4.28.0",
-    )
-    parser.add_argument(
-        "--verso-blueprint-ref",
-        default="lean-v4.28.0",
-    )
-    parser.add_argument(
         "--force",
         action="store_true",
         help="Allow the target repo root to already contain canonical helper-managed files.",
@@ -128,10 +120,6 @@ def run_bootstrap(args: argparse.Namespace, project_root: Path, formalization_pa
         formalization_path,
         "--tex-source-glob",
         args.tex_source_glob,
-        "--lean-toolchain",
-        args.lean_toolchain,
-        "--verso-blueprint-ref",
-        args.verso_blueprint_ref,
     ]
     if args.force:
         command.append("--force")
@@ -140,10 +128,11 @@ def run_bootstrap(args: argparse.Namespace, project_root: Path, formalization_pa
 
 def print_next_steps(project_root: Path) -> None:
     print("\nNext steps:")
-    print(f"1. Review {project_root / 'verso-harness.toml'} and set lt.default_chapters explicitly.")
-    print("2. Run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`.")
-    print("3. Copy the host guidance from `tools/verso-harness/snippets/AGENTS.host.md` into `AGENTS.md`.")
-    print("4. Start the first LT pass using `references/start-new-port.md`.")
+    print("1. Confirm the upstream formalization lean-toolchain was copied to the root.")
+    print(f"2. Review {project_root / 'verso-harness.toml'} and set lt.default_chapters explicitly.")
+    print("3. Run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`.")
+    print("4. Copy the host guidance from `tools/verso-harness/snippets/AGENTS.host.md` into `AGENTS.md`.")
+    print("5. Start the first LT pass using `references/start-new-port.md`.")
 
 
 def main() -> int:

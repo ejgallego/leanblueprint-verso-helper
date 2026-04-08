@@ -54,9 +54,10 @@ a host Lean project that is porting a `leanblueprint` or TeX blueprint source to
 - If a chapter is only partially ported, continue with the next coherent
   section block instead of scattering edits across unrelated files.
 - Keep shared macros in one `TeXPrelude` module.
-- Keep the harness dependency stack aligned with the current pattern where
-  `VersoBlueprint` drives the `verso` dependency unless the host repo has a
-  clear reason to pin `verso` directly.
+- The upstream formalization determines the Lean toolchain. Keep the root
+  `lean-toolchain` equal to the upstream value, and choose the matching
+  `VersoBlueprint` branch `lean-<release>` unless explicit compatibility work
+  says otherwise.
 - Validate edited blueprint modules incrementally.
 - After a coherent batch, run `bash ./scripts/ci-pages.sh`.
 - Keep the root build green. If a faithful Lean link would pull in imports that

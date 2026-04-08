@@ -7,9 +7,10 @@ The helper assumes the current LT-first workflow: preserve theorem order,
 section order, paragraph boundaries, and dependency edges from the legacy
 blueprint unless there is a clear harness reason not to.
 
-It tracks the current `verso-flt` harness pattern where Lean 4.28 and the
-`VersoBlueprint` compatibility branch drive the stack, including support for
-labeled local `tex` blocks when raw TeX needs to remain visible in the port.
+It follows a deterministic dependency rule: the upstream formalization decides
+`lean-toolchain`, and the helper selects the matching `VersoBlueprint` branch
+for that Lean release, while still supporting labeled local `tex` blocks when
+raw TeX needs to remain visible in the port.
 
 Every helper-managed repo must carry a root `verso-harness.toml`. The helper
 reads package layout, chapter scope, and LT defaults from that file and does
@@ -75,7 +76,9 @@ project-owned blueprint modules or chapter prose.
 The canonical startup script delegates to `scripts/bootstrap.py` after the
 formalization submodule is in place. `bootstrap.py` remains available as the
 low-level scaffolding command, but new ports should prefer
-`scripts/start_new_port.py`.
+`scripts/start_new_port.py`. In that canonical flow, the upstream
+formalization's `lean-toolchain` is authoritative; the helper copies it to the
+root and chooses the matching `VersoBlueprint` branch `lean-<release>`.
 
 ## LT Audit Stack
 
