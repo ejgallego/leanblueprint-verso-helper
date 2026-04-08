@@ -46,6 +46,11 @@ When the host repo bumps `tools/verso-harness`:
 4. rerun the LT audit stack on any direct-port chapters touched by the update
 5. run the normal site smoke test
 
+The shared harness may also move independently of local chapter work because it is maintained
+across many ports. Agents should treat unexpected `tools/verso-harness` changes as normal
+shared-infrastructure updates: inspect the helper diff first, then rerun `check_harness.py`,
+then decide whether only helper-owned files changed or whether project-owned files need review.
+
 If the helper changed template expectations rather than CI, port those changes
 manually into the project-owned files.
 
