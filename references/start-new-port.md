@@ -3,6 +3,11 @@
 This is the canonical startup path for a new Leanblueprint-to-Verso project.
 Use it from an empty directory. Do not ask the agent to choose a layout.
 
+The intended operator flow is:
+- a human creates the repo and runs the startup commands
+- the human then opens Codex CLI inside the repo
+- Codex performs the chapter porting work under the local `AGENTS.md` and harness docs
+
 ## Canonical Shape
 
 Always create a dedicated integration repository whose root is the Verso
@@ -58,7 +63,8 @@ After the script finishes:
 5. set `lt.default_chapters` explicitly
 6. run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`
 7. copy `tools/verso-harness/snippets/AGENTS.host.md` into `AGENTS.md`
-8. start the first LT chapter pass
+8. choose the first direct-port chapter from `lt.default_chapters`
+9. open Codex CLI and issue the first porting prompt for one coherent section of that chapter
 
 ## Start-Port Prompt
 

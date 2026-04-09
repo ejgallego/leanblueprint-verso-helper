@@ -7,6 +7,11 @@ Use it when:
 - you are starting a new blueprint port from scratch
 - you already have an older port and want to bring it up to the current shared setup
 
+The normal operating model is:
+- a human sets up the repo with this harness
+- the human uses Codex CLI to issue prompts and carry out the porting work
+- Codex reads `verso-harness.toml`, `AGENTS.md`, and the harness docs
+
 ## Start Here
 
 Add the shared harness to your repo:
@@ -34,7 +39,8 @@ After that:
 2. set `lt.default_chapters`
 3. run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`
 4. copy `tools/verso-harness/snippets/AGENTS.host.md` into `AGENTS.md`
-5. start the first chapter port
+5. choose the first direct-port chapter from `lt.default_chapters`
+6. open Codex CLI and issue the first porting prompt for one coherent section of that chapter
 
 ## The Three Main Rules
 
