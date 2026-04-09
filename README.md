@@ -64,6 +64,7 @@ Run the main chapter-audit commands:
 python3 tools/verso-harness/scripts/check_lt_source_pairs.py --project-root . path/to/Chapter.lean
 python3 tools/verso-harness/scripts/check_lt_similarity.py --project-root . path/to/Chapter.lean
 python3 tools/verso-harness/scripts/check_source_label_grounding.py --project-root . path/to/Chapter.lean
+python3 tools/verso-harness/scripts/check_verso_math_delimiters.py --project-root . path/to/Chapter.lean
 python3 tools/verso-harness/scripts/lt_audit.py --project-root . path/to/Chapter.lean
 ```
 
@@ -87,5 +88,7 @@ Detailed porting workflow:
   diff and rerun `check_harness.py`.
 - The helper chooses the matching `VersoBlueprint` branch from the Lean
   toolchain used by the upstream math project.
+- Verso inline math opens with `$`` and closes with the final backtick alone.
+  The malformed TeX-like pattern `$`...`$` must not be introduced while porting.
 - Generated `README.md` files are starting points only; after bootstrap they are
   project-owned.

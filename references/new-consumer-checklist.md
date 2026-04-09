@@ -78,7 +78,7 @@ Treat the legacy TeX / leanblueprint source as read-only source of truth.
 Start a faithful LT pass on the first unchecked chapter in lt.default_chapters.
 Do not rewrite the prose for style.
 Add adjacent tex witnesses for every translated informal block.
-After the edit, run check_lt_source_pairs.py, check_lt_similarity.py, and check_source_label_grounding.py on the touched chapter.
+After the edit, run check_lt_source_pairs.py, check_lt_similarity.py, check_source_label_grounding.py, and check_verso_math_delimiters.py on the touched chapter.
 Record any deliberate non-literal deviations.
 ```
 
@@ -100,6 +100,7 @@ For each touched direct-port chapter, run:
 python3 tools/verso-harness/scripts/check_lt_source_pairs.py --project-root . path/to/Chapter.lean
 python3 tools/verso-harness/scripts/check_lt_similarity.py --project-root . path/to/Chapter.lean
 python3 tools/verso-harness/scripts/check_source_label_grounding.py --project-root . path/to/Chapter.lean
+python3 tools/verso-harness/scripts/check_verso_math_delimiters.py --project-root . path/to/Chapter.lean
 ```
 
 Use the one-shot combined command when useful:

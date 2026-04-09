@@ -71,6 +71,6 @@ Start a faithful LT pass on the first unchecked chapter in lt.default_chapters.
 Do not rewrite the prose for style.
 Add adjacent tex witnesses for every translated informal block.
 Do not invent new dependency edges or placeholder Lean declarations.
-After the edit, run check_lt_source_pairs.py, check_lt_similarity.py, and check_source_label_grounding.py on the touched chapter.
+After the edit, run check_lt_source_pairs.py, check_lt_similarity.py, check_source_label_grounding.py, and check_verso_math_delimiters.py on the touched chapter.
 Record any deliberate non-literal deviations.
 ```

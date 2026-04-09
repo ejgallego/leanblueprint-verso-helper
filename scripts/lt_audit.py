@@ -103,6 +103,11 @@ def main() -> int:
         action="store_true",
         help="Pass through verbose per-block LT similarity output instead of the summary view.",
     )
+    parser.add_argument(
+        "--math-sanity",
+        action="store_true",
+        help="Also run the conservative Verso math-delimiter checker on each touched chapter.",
+    )
     args = parser.parse_args()
 
     project_root = resolve_project_root(args.project_root)
@@ -115,6 +120,7 @@ def main() -> int:
     overall_ok = True
     source_pair_script = str(SCRIPT_DIR / "check_lt_source_pairs.py")
     similarity_script = str(SCRIPT_DIR / "check_lt_similarity.py")
+    math_script = str(SCRIPT_DIR / "check_verso_math_delimiters.py")
 
     for path in paths:
         print(f"\n== {path}")
@@ -148,6 +154,15 @@ def main() -> int:
         )
         print_step(similarity_result)
         overall_ok &= similarity_result.ok
+
+        if args.math_sanity:
+            math_result = run_step(
+                project_root,
+                "math delimiter check",
+                [sys.executable, math_script, "--project-root", str(project_root), str(path)],
+            )
+            print_step(math_result)
+            overall_ok &= math_result.ok
 
         if not args.no_build:
             module = lean_file_to_module(project_root, path)

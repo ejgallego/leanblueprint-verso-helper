@@ -16,6 +16,9 @@ Faithfulness`) are accepted aliases for the same workflow.
   footprint. Do not smooth or summarize the prose just because it reads better.
 - If the source uses mathematical notation, keep it as mathematics where
   practical rather than demoting it into code spans.
+- Valid Verso inline math opens with `$`` and closes with the final backtick
+  alone. Because this overlaps with Markdown-style backticks, be conservative:
+  do not transform already-valid `$`...`` into the malformed form `$`...`$`.
 - Do not promote plain prose into new theorem, definition, or proof nodes
   unless the source already has a corresponding formal environment or proof
   step that should remain graph-visible.
@@ -52,7 +55,8 @@ After a coherent direct-port batch, run:
 ```bash
 python3 tools/verso-harness/scripts/check_lt_source_pairs.py --project-root . path/to/Chapter.lean
 python3 tools/verso-harness/scripts/check_lt_similarity.py --project-root . path/to/Chapter.lean
+python3 tools/verso-harness/scripts/check_verso_math_delimiters.py --project-root . path/to/Chapter.lean
 ```
 
-Use `lt_audit.py` when you also want the focused chapter build and optional
-pages smoke test.
+Use `lt_audit.py --math-sanity` when you also want the focused chapter build,
+optional pages smoke test, and the conservative math-delimiter check.

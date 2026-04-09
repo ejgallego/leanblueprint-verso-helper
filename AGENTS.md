@@ -19,7 +19,7 @@ a host Lean project that is porting a `leanblueprint` or TeX blueprint source to
 - For audits, use `scripts/check_harness.py`.
 - For direct-port LT audits, use `scripts/check_lt_source_pairs.py`,
   `scripts/check_lt_similarity.py`, `scripts/check_source_label_grounding.py`,
-  `scripts/status_lt.py`, and
+  `scripts/check_verso_math_delimiters.py`, `scripts/status_lt.py`, and
   `scripts/lt_audit.py`.
 - For older ports that predate the source-paired LT method, read
   `references/retrofit.md` before editing chapters.
