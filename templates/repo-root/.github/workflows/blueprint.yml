@@ -67,6 +67,8 @@ jobs:
               lake exe cache get || true
             )
           fi
+      - name: Validate harness contract
+        run: python3 tools/verso-harness/scripts/check_harness.py --project-root .
       - name: Build Blueprint site
         run: bash ./scripts/ci-pages.sh
       - name: Upload Pages artifact
