@@ -122,6 +122,7 @@ Helper-owned and safe to refresh mechanically:
 
 Host-owned and review-driven:
 
+- `README.md`
 - `verso-harness.toml`
 - `lakefile.lean`
 - `lean-toolchain`

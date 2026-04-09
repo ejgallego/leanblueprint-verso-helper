@@ -19,6 +19,7 @@ The helper intentionally separates files into two groups.
 
 Project-owned after bootstrap:
 
+- `README.md`
 - `lakefile.lean`
 - `lean-toolchain`
 - `BlueprintMain.lean`
@@ -32,6 +33,10 @@ Helper-owned for automated refresh:
 - `.github/workflows/blueprint.yml`
 
 Use `scripts/update_ci.py` only for the helper-owned files.
+
+The generated README is a starting point for the consumer repo and remains
+project-owned after bootstrap. The helper should not rewrite it automatically
+on later updates.
 
 The LT audit scripts live in the helper submodule and run against the host repo
 in place. They are not copied into the host root.

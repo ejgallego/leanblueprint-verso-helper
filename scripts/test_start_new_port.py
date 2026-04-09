@@ -69,6 +69,7 @@ class StartNewPortTests(unittest.TestCase):
             )
             lakefile = (project / 'lakefile.lean').read_text(encoding='utf-8')
             self.assertIn('@ "lean-v4.28.0"', lakefile)
+            self.assertTrue((project / 'README.md').exists())
             self.assertTrue((project / 'verso-harness.toml').exists())
             self.assertTrue((project / 'BlueprintMain.lean').exists())
             config_text = (project / 'verso-harness.toml').read_text(encoding='utf-8')

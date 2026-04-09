@@ -53,6 +53,7 @@ class BootstrapTests(unittest.TestCase):
             lakefile = (root / 'lakefile.lean').read_text(encoding='utf-8')
             self.assertIn('@ "lean-v4.28.0"', lakefile)
 
+            self.assertTrue((root / 'README.md').exists())
             config_path = root / 'verso-harness.toml'
             self.assertTrue(config_path.exists())
             config_text = config_path.read_text(encoding='utf-8')
