@@ -1,24 +1,22 @@
 # Leanblueprint To Verso Harness
 
-Shared harness for deterministic ports from `leanblueprint` or TeX blueprints to
-`verso-blueprint`.
+This repository helps you turn an existing `leanblueprint` or TeX blueprint
+project into a Verso-based blueprint site.
 
-## Hard Rules
-
-- The upstream formalization determines `lean-toolchain`.
-- The consumer repo root must carry `verso-harness.toml`.
-- New ports start from an empty directory with the canonical integration-repo
-  layout.
+Use it when:
+- you are starting a new blueprint port from scratch
+- you already have an older port and want to bring it up to the current shared setup
 
 ## Start Here
 
-Add the harness:
+Add the shared harness to your repo:
 
 ```bash
 git submodule add git@github.com:ejgallego/leanblueprint-to-verso.git tools/verso-harness
 ```
 
-For a new port from an empty directory, use:
+If you are starting a brand-new port from an empty directory, the first command
+you should run is:
 
 ```bash
 python3 tools/verso-harness/scripts/start_new_port.py \
@@ -31,32 +29,36 @@ python3 tools/verso-harness/scripts/start_new_port.py \
   --tex-source-glob "<relative-tex-source-path-or-glob>"
 ```
 
-Then:
-
+After that:
 1. review `verso-harness.toml`
 2. set `lt.default_chapters`
 3. run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`
 4. copy `tools/verso-harness/snippets/AGENTS.host.md` into `AGENTS.md`
-5. start the first LT chapter pass
+5. start the first chapter port
 
-## Main Workflows
+## The Three Main Rules
 
-New port:
-- [`references/start-new-port.md`](references/start-new-port.md)
+- The upstream math project decides the Lean toolchain.
+- Every managed repo must have a root `verso-harness.toml` file.
+- New ports use one standard layout; do not invent a new one.
 
-Existing port retrofit:
+## If Your Repo Already Exists
+
+If you already have an older port, use the retrofit path instead of the
+empty-directory start path:
+
 - [`references/retrofit.md`](references/retrofit.md)
 - [`references/maintenance.md`](references/maintenance.md)
 
-LT workflow and policy:
-- [`references/lt-method.md`](references/lt-method.md)
-- [`references/porting.md`](references/porting.md)
-- [`AGENTS.md`](AGENTS.md)
+## Common Commands
 
-Onboarding checklist:
-- [`references/new-consumer-checklist.md`](references/new-consumer-checklist.md)
+Check that the repo matches the expected shared setup:
 
-## LT Commands
+```bash
+python3 tools/verso-harness/scripts/check_harness.py --project-root .
+```
+
+Run the main chapter-audit commands:
 
 ```bash
 python3 tools/verso-harness/scripts/check_lt_source_pairs.py --project-root . path/to/Chapter.lean
@@ -65,23 +67,25 @@ python3 tools/verso-harness/scripts/check_source_label_grounding.py --project-ro
 python3 tools/verso-harness/scripts/lt_audit.py --project-root . path/to/Chapter.lean
 ```
 
-## Ownership
+## More Detailed Docs
 
-Helper-owned and safe to refresh automatically:
-- `scripts/ci-pages.sh`
-- `.github/workflows/blueprint.yml`
+Start a new port from an empty directory:
+- [`references/start-new-port.md`](references/start-new-port.md)
 
-Project-owned after bootstrap:
-- `README.md`
-- `verso-harness.toml`
-- `lakefile.lean`
-- `lean-toolchain`
-- `BlueprintMain.lean` or the configured `blueprint_main`
-- root blueprint modules and chapter prose
+Short adoption checklist:
+- [`references/new-consumer-checklist.md`](references/new-consumer-checklist.md)
+
+Detailed porting workflow:
+- [`references/porting.md`](references/porting.md)
+- [`references/lt-method.md`](references/lt-method.md)
+- [`AGENTS.md`](AGENTS.md)
 
 ## Notes
 
-- The helper chooses the matching `VersoBlueprint` branch as `lean-<release>`.
-- Shared harness updates may arrive independently of local chapter work; inspect
-  the helper diff, rerun `check_harness.py`, then decide whether only
-  helper-owned files changed or whether project-owned files need review.
+- The shared setup may change over time because it is used by more than one
+  project. If `tools/verso-harness` changes unexpectedly, inspect the helper
+  diff and rerun `check_harness.py`.
+- The helper chooses the matching `VersoBlueprint` branch from the Lean
+  toolchain used by the upstream math project.
+- Generated `README.md` files are starting points only; after bootstrap they are
+  project-owned.
