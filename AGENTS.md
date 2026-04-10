@@ -12,10 +12,10 @@ a host Lean project that is porting a `leanblueprint` or TeX blueprint source to
 - Helper-managed repos must declare their layout explicitly in
   `verso-harness.toml`; this helper does not guess package or chapter layout.
 - Use a fresh git worktree for each distinct change to this repository.
-- Keep each worktree on the same local filesystem as the main checkout, in a
-  user-approved local path.
-- Do not use `/tmp` or any other cross-filesystem location for git worktrees on
-  this machine.
+- Create that worktree under `.codex-worktrees/<task>` inside the main
+  checkout.
+- Do not use sibling worktrees, `/tmp`, or any other location outside
+  `.codex-worktrees/` for git worktrees on this machine.
 
 ## Primary Workflows
 
