@@ -11,10 +11,13 @@ a host Lean project that is porting a `leanblueprint` or TeX blueprint source to
 - The host repository owns the files materialized into its root.
 - Helper-managed repos must declare their layout explicitly in
   `verso-harness.toml`; this helper does not guess package or chapter layout.
+- Do not use `/tmp` for git worktrees on this machine; create sibling worktrees
+  on the project filesystem instead.
 
 ## Primary Workflows
 
 - For first-time setup of an outer harness, use `scripts/bootstrap.py`.
+- For maintenance status, use `scripts/status_harness.py` first.
 - For maintenance of helper-owned CI files, use `scripts/update_ci.py`.
 - For audits, use `scripts/check_harness.py`.
 - For direct-port LT audits, use `scripts/check_lt_source_pairs.py`,

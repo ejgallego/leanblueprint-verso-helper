@@ -10,8 +10,10 @@
   - `tools/verso-harness/references/maintenance.md`
   - `tools/verso-harness/references/retrofit.md`
   - `tools/verso-harness/references/beam-validation.md`
+- Start maintenance with `python3 tools/verso-harness/scripts/status_harness.py --project-root .`
+  so you can see helper, upstream, and `VersoBlueprint` drift first.
 - Use `python3 tools/verso-harness/scripts/check_harness.py --project-root .`
-  to audit the local harness.
+  to audit the local harness layout after that status pass.
 - Treat the legacy TeX or `leanblueprint` source as the prose source of truth.
 - Record the real TeX chapter source locator for this repo. The common legacy
   layout is `./blueprint/src/chapter/*.tex`, but some projects use a single

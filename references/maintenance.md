@@ -2,6 +2,16 @@
 
 Use this workflow after the initial port exists.
 
+The first command in a maintenance pass should be:
+
+```bash
+python3 tools/verso-harness/scripts/status_harness.py --project-root .
+```
+
+Use that status view to see whether the helper checkout, the vendored
+formalization, or the resolved `VersoBlueprint` package have moved before you
+start updating files.
+
 ## Routine Tasks
 
 Common maintenance work includes:
@@ -45,11 +55,12 @@ in place. They are not copied into the host root.
 
 When the host repo bumps `tools/verso-harness`:
 
-1. read the helper diff
-2. run `python3 tools/verso-harness/scripts/update_ci.py --project-root .`
-3. run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`
-4. rerun the LT audit stack on any direct-port chapters touched by the update
-5. run the normal site smoke test
+1. run `python3 tools/verso-harness/scripts/status_harness.py --project-root .`
+2. read the helper diff
+3. run `python3 tools/verso-harness/scripts/update_ci.py --project-root .`
+4. run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`
+5. rerun the LT audit stack on any direct-port chapters touched by the update
+6. run the normal site smoke test
 
 The shared harness may also move independently of local chapter work because it is maintained
 across many ports. Agents should treat unexpected `tools/verso-harness` changes as normal

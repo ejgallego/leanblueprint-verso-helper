@@ -59,7 +59,13 @@ empty-directory start path:
 
 ## Common Commands
 
-Check that the repo matches the expected shared setup:
+Start any maintenance pass with the repo-level status check:
+
+```bash
+python3 tools/verso-harness/scripts/status_harness.py --project-root .
+```
+
+Then check that the repo still matches the expected shared setup:
 
 ```bash
 python3 tools/verso-harness/scripts/check_harness.py --project-root .
