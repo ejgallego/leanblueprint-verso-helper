@@ -11,8 +11,11 @@ a host Lean project that is porting a `leanblueprint` or TeX blueprint source to
 - The host repository owns the files materialized into its root.
 - Helper-managed repos must declare their layout explicitly in
   `verso-harness.toml`; this helper does not guess package or chapter layout.
-- Do not use `/tmp` for git worktrees on this machine; create sibling worktrees
-  on the project filesystem instead.
+- Use a fresh git worktree for each distinct change to this repository.
+- Keep each worktree on the same local filesystem as the main checkout, in a
+  user-approved local path.
+- Do not use `/tmp` or any other cross-filesystem location for git worktrees on
+  this machine.
 
 ## Primary Workflows
 
