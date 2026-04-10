@@ -18,7 +18,10 @@ from _harnesslib import (  # noqa: E402
     find_lake_lean_option_bool,
     find_lake_lean_option_nat,
     find_package_name,
+    find_verso_blueprint_dependency,
     load_config,
+    verso_math_lint_option_name,
+    verso_strict_external_code_option_name,
 )
 
 
@@ -80,10 +83,14 @@ def main() -> int:
                 f"lakefile package {declared_package!r} does not match {CONFIG_FILENAME} package_name {config.package_name!r}"
             )
 
-        math_lint = find_lake_lean_option_bool(project_root, "verso.blueprint.math.lint")
+        _, verso_ref = find_verso_blueprint_dependency(project_root)
+        math_lint_option = verso_math_lint_option_name(verso_ref)
+        strict_external_code_option = verso_strict_external_code_option_name(verso_ref)
+
+        math_lint = find_lake_lean_option_bool(project_root, math_lint_option)
         if math_lint is not True:
             mismatches.append(
-                "lakefile.lean must set `verso.blueprint.math.lint` to true in package leanOptions"
+                f"lakefile.lean must set `{math_lint_option}` to true in package leanOptions"
             )
 
         warn_line_length = find_lake_lean_option_nat(project_root, "verso.code.warnLineLength")
@@ -94,13 +101,13 @@ def main() -> int:
 
         strict_external_code = find_lake_lean_option_bool(
             project_root,
-            "verso.blueprint.externalCode.strictResolve",
+            strict_external_code_option,
         )
         if strict_external_code != config.strict_external_code:
             expected = "true" if config.strict_external_code else "false"
             mismatches.append(
                 "lakefile.lean must set "
-                f"`verso.blueprint.externalCode.strictResolve` to {expected} "
+                f"`{strict_external_code_option}` to {expected} "
                 f"to match {CONFIG_FILENAME} harness.strict_external_code"
             )
 

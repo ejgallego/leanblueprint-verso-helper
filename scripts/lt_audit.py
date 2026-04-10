@@ -138,7 +138,8 @@ def main() -> int:
         action="store_true",
         help=(
             "Fail the chapter build if Lean, Verso, or VersoBlueprint warnings are logged "
-            "during elaboration."
+            "during elaboration. Imported upstream warnings, including transitive "
+            "`declaration uses 'sorry'` reports, also count."
         ),
     )
     native_warning_group.add_argument(

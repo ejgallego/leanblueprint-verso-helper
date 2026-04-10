@@ -70,8 +70,12 @@ fail on Lean, Verso, or VersoBlueprint warnings. Generated consumers disable
 the noisy `VersoManual` inline-code line-length warning by default, so this is
 intended for math lint and other structural warning surfaces rather than prose
 formatting noise.
+Imported upstream warnings also count here. If the vendored formalization still
+emits transitive `declaration uses 'sorry'` warnings, treat a
+`--native-warnings` failure as upstream-only until that upstream warning debt is
+cleaned.
 
 The default `lt_audit.py` native warning mode follows
 `harness.native_warnings` in `verso-harness.toml`, and generated consumers keep
-`verso.blueprint.externalCode.strictResolve` aligned with
+the version-appropriate `strictResolve` lean option aligned with
 `harness.strict_external_code`.

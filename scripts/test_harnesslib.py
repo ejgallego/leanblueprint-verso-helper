@@ -12,10 +12,13 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from _harnesslib import (  # noqa: E402
+    default_verso_blueprint_ref,
     find_lake_lean_option_bool,
     find_lake_lean_option_nat,
     find_verso_blueprint_dependency,
     parse_github_repo_slug,
+    verso_math_lint_option_name,
+    verso_strict_external_code_option_name,
 )
 
 
@@ -58,6 +61,34 @@ class HarnessLibTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(find_verso_blueprint_dependency(Path(tmp)), (None, None))
 
+    def test_default_verso_blueprint_ref_uses_v_release_convention(self) -> None:
+        self.assertEqual(
+            default_verso_blueprint_ref("leanprover/lean4:v4.28.0"),
+            "v4.28.0",
+        )
+        self.assertEqual(
+            default_verso_blueprint_ref("leanprover/lean4:nightly-2026-04-10"),
+            "nightly-2026-04-10",
+        )
+
+    def test_versioned_verso_option_names_follow_ref_policy(self) -> None:
+        self.assertEqual(
+            verso_math_lint_option_name("v4.28.0"),
+            "weak.verso.blueprint.math.lint",
+        )
+        self.assertEqual(
+            verso_strict_external_code_option_name("lean-v4.28.0"),
+            "weak.verso.blueprint.externalCode.strictResolve",
+        )
+        self.assertEqual(
+            verso_math_lint_option_name("v4.29.0"),
+            "verso.blueprint.math.lint",
+        )
+        self.assertEqual(
+            verso_strict_external_code_option_name("v4.29.0"),
+            "verso.blueprint.externalCode.strictResolve",
+        )
+
     def test_find_lake_lean_option_helpers_read_generated_policy_options(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -66,8 +97,8 @@ class HarnessLibTests(unittest.TestCase):
                     [
                         'package DemoBlueprint where',
                         '  leanOptions := #[',
-                        '    ⟨`verso.blueprint.math.lint, true⟩,',
-                        '    ⟨`verso.blueprint.externalCode.strictResolve, false⟩,',
+                        '    ⟨`weak.verso.blueprint.math.lint, true⟩,',
+                        '    ⟨`weak.verso.blueprint.externalCode.strictResolve, false⟩,',
                         '    ⟨`verso.code.warnLineLength, .ofNat 0⟩',
                         '  ]',
                     ]
@@ -75,9 +106,12 @@ class HarnessLibTests(unittest.TestCase):
                 + '\n',
                 encoding='utf-8',
             )
-            self.assertTrue(find_lake_lean_option_bool(root, "verso.blueprint.math.lint"))
+            self.assertTrue(find_lake_lean_option_bool(root, "weak.verso.blueprint.math.lint"))
             self.assertFalse(
-                find_lake_lean_option_bool(root, "verso.blueprint.externalCode.strictResolve")
+                find_lake_lean_option_bool(
+                    root,
+                    "weak.verso.blueprint.externalCode.strictResolve",
+                )
             )
             self.assertEqual(find_lake_lean_option_nat(root, "verso.code.warnLineLength"), 0)
 

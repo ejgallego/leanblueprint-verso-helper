@@ -75,8 +75,8 @@ If the helper changed template expectations rather than CI, port those changes
 manually into the project-owned files.
 In particular, keep `lakefile.lean` aligned with the warning policy declared in
 `verso-harness.toml`; `check_harness.py` verifies the generated
-`verso.blueprint.math.lint`, `verso.code.warnLineLength`, and
-`verso.blueprint.externalCode.strictResolve` settings.
+version-appropriate math-lint and strict-resolve lean options together with the
+shared `verso.code.warnLineLength` setting.
 
 ## Adding New Blueprint Content
 

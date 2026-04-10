@@ -8,7 +8,12 @@ import stat
 import sys
 from pathlib import Path
 
-from _harnesslib import parse_github_repo_slug
+from _harnesslib import (
+    default_verso_blueprint_ref,
+    parse_github_repo_slug,
+    verso_math_lint_option_name,
+    verso_strict_external_code_option_name,
+)
 
 
 PLACEHOLDER_PATTERN = re.compile(r"__[A-Z0-9_]+__")
@@ -104,15 +109,6 @@ def ensure_executable(path: Path) -> None:
     path.chmod(mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
-def extract_lean_release(lean_toolchain: str) -> str:
-    value = lean_toolchain.strip()
-    return value.rsplit(":", 1)[-1] if ":" in value else value
-
-
-def default_verso_blueprint_ref(lean_toolchain: str) -> str:
-    return extract_lean_release(lean_toolchain)
-
-
 def default_pages_workflow_repo() -> str:
     repo = parse_github_repo_slug("https://github.com/leanprover/verso-blueprint.git")
     if repo is None:
@@ -155,6 +151,8 @@ def main() -> int:
     lean_toolchain, verso_blueprint_ref = resolve_harness_versions(args, project_root)
     pages_workflow_repo = args.pages_workflow_repo or default_pages_workflow_repo()
     pages_workflow_ref = args.pages_workflow_ref or verso_blueprint_ref
+    math_lint_option = verso_math_lint_option_name(verso_blueprint_ref)
+    strict_external_code_option = verso_strict_external_code_option_name(verso_blueprint_ref)
 
     replacements = {
         "__PACKAGE_NAME__": args.package_name,
@@ -164,6 +162,8 @@ def main() -> int:
         "__TEX_SOURCE_GLOB__": args.tex_source_glob,
         "__LEAN_TOOLCHAIN__": lean_toolchain,
         "__VERSO_BLUEPRINT_REF__": verso_blueprint_ref,
+        "__VERSO_MATH_LINT_OPTION__": math_lint_option,
+        "__VERSO_STRICT_EXTERNAL_CODE_OPTION__": strict_external_code_option,
         "__STRICT_EXTERNAL_CODE__": "true",
         "__PAGES_WORKFLOW_REPO__": pages_workflow_repo,
         "__PAGES_WORKFLOW_REF__": pages_workflow_ref,

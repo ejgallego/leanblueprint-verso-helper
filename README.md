@@ -111,11 +111,11 @@ Detailed porting workflow:
   `VersoBlueprint` ref used in `lakefile.lean`.
 - The helper chooses the matching `VersoBlueprint` branch from the Lean
   toolchain used by the upstream math project.
-- Generated consumers keep `verso.blueprint.math.lint` enabled and disable the
-  noisy `VersoManual` inline-code line-length warning via
-  `verso.code.warnLineLength := 0`.
+- Generated consumers keep the version-appropriate Verso math-lint option
+  enabled and disable the noisy `VersoManual` inline-code line-length warning
+  via `verso.code.warnLineLength := 0`.
 - Generated consumers also set
-  `verso.blueprint.externalCode.strictResolve` from the default harness
+  the version-appropriate strict-resolve option from the default harness
   warning policy, and `check_harness.py` verifies that `lakefile.lean` stays
   aligned with the declared `verso-harness.toml` settings.
 - Verso inline math opens with `$`` and closes with the final backtick alone.

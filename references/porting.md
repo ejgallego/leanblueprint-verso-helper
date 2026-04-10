@@ -117,6 +117,9 @@ python3 tools/verso-harness/scripts/lt_audit.py --project-root . --native-warnin
 The default `lt_audit.py` native warning behavior follows
 `harness.native_warnings` in `verso-harness.toml`. Use `--native-warnings` or
 `--no-native-warnings` to override it for one run.
+Imported upstream warnings also count in `--native-warnings` mode, so a
+transitive upstream `declaration uses 'sorry'` warning is an expected upstream
+failure mode rather than a consumer chapter regression.
 
 Treat low similarity scores as a triage signal, not as permission to rewrite
 freely. First ask whether the witness is too large, whether metadata drift is

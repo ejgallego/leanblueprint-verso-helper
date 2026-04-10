@@ -48,9 +48,9 @@
 - Keep shared TeX macros in one `TeXPrelude.lean` module.
 - Prefer the harness pattern where `VersoBlueprint` drives the `verso`
   dependency unless this repo has a concrete reason to pin `verso` directly.
-- Generated consumers keep `verso.blueprint.math.lint` enabled, disable the
-  noisy `VersoManual` inline-code line-length warning, and default
-  `verso.blueprint.externalCode.strictResolve` from
+- Generated consumers keep the version-appropriate Verso math-lint option
+  enabled, disable the noisy `VersoManual` inline-code line-length warning, and
+  default the version-appropriate strict-resolve option from
   `harness.strict_external_code`.
 - After editing direct-port chapters, run:
   - `python3 tools/verso-harness/scripts/check_lt_source_pairs.py --project-root . <chapter.lean>`

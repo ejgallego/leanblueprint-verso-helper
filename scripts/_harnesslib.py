@@ -32,6 +32,7 @@ DEFAULT_LT_NODE_KIND_PAIRS = (
 )
 DEFAULT_NATIVE_WARNINGS = False
 DEFAULT_STRICT_EXTERNAL_CODE = True
+WEAK_VERSO_OPTION_REFS = frozenset({"v4.28.0"})
 
 
 @dataclass(frozen=True)
@@ -69,6 +70,48 @@ def parse_github_repo_slug(url: str) -> str | None:
     if match is None:
         return None
     return match.group("slug")
+
+
+def extract_lean_release(lean_toolchain: str) -> str:
+    value = lean_toolchain.strip()
+    return value.rsplit(":", 1)[-1] if ":" in value else value
+
+
+def default_verso_blueprint_ref(lean_toolchain: str) -> str:
+    release = extract_lean_release(lean_toolchain)
+    if release.startswith("v"):
+        return release
+    if re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.]+)?", release):
+        return f"v{release}"
+    return release
+
+
+def normalize_verso_blueprint_ref(ref: str) -> str:
+    value = ref.strip()
+    if value.startswith("lean-"):
+        value = value[len("lean-") :]
+    if re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.]+)?", value):
+        return f"v{value}"
+    return value
+
+
+def verso_blueprint_uses_weak_options(ref: str | None) -> bool:
+    if ref is None:
+        return False
+    return normalize_verso_blueprint_ref(ref) in WEAK_VERSO_OPTION_REFS
+
+
+def verso_blueprint_option_name(ref: str | None, suffix: str) -> str:
+    prefix = "weak.verso" if verso_blueprint_uses_weak_options(ref) else "verso"
+    return f"{prefix}.{suffix}"
+
+
+def verso_math_lint_option_name(ref: str | None) -> str:
+    return verso_blueprint_option_name(ref, "blueprint.math.lint")
+
+
+def verso_strict_external_code_option_name(ref: str | None) -> str:
+    return verso_blueprint_option_name(ref, "blueprint.externalCode.strictResolve")
 
 
 def find_verso_blueprint_dependency(project_root: Path) -> tuple[str | None, str | None]:

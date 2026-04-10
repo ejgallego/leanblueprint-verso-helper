@@ -22,7 +22,16 @@ def write_file(path: Path, text: str, *, executable: bool = False) -> None:
         path.chmod(mode | stat.S_IXUSR)
 
 
-def write_harness_project(root: Path, *, strict_external_code: bool, lake_strict_external_code: bool) -> None:
+def write_harness_project(
+    root: Path,
+    *,
+    lean_toolchain: str,
+    verso_ref: str,
+    math_lint_option: str,
+    strict_external_code: bool,
+    strict_external_code_option: str,
+    lake_strict_external_code: bool,
+) -> None:
     write_file(
         root / "verso-harness.toml",
         "\n".join(
@@ -53,12 +62,12 @@ def write_harness_project(root: Path, *, strict_external_code: bool, lake_strict
                 "open Lake DSL",
                 "",
                 'require Demo from "./Demo"',
-                'require VersoBlueprint from git "https://github.com/leanprover/verso-blueprint.git" @ "v4.29.0"',
+                f'require VersoBlueprint from git "https://github.com/leanprover/verso-blueprint.git" @ "{verso_ref}"',
                 "",
                 "package DemoBlueprint where",
                 "  leanOptions := #[",
-                "    ⟨`verso.blueprint.math.lint, true⟩,",
-                f"    ⟨`verso.blueprint.externalCode.strictResolve, {'true' if lake_strict_external_code else 'false'}⟩,",
+                f"    ⟨`{math_lint_option}, true⟩,",
+                f"    ⟨`{strict_external_code_option}, {'true' if lake_strict_external_code else 'false'}⟩,",
                 "    ⟨`verso.code.warnLineLength, .ofNat 0⟩",
                 "  ]",
                 "",
@@ -68,7 +77,7 @@ def write_harness_project(root: Path, *, strict_external_code: bool, lake_strict
         )
         + "\n",
     )
-    write_file(root / "lean-toolchain", "leanprover/lean4:v4.29.0\n")
+    write_file(root / "lean-toolchain", lean_toolchain + "\n")
     write_file(root / "BlueprintMain.lean", "import DemoBlueprint\n")
     write_file(root / "DemoBlueprint.lean", "import DemoBlueprint.TeXPrelude\n")
     write_file(root / "DemoBlueprint" / "TeXPrelude.lean", "import VersoBlueprint\n")
@@ -106,22 +115,54 @@ def run_check(project_root: Path) -> subprocess.CompletedProcess[str]:
 
 
 class CheckHarnessTests(unittest.TestCase):
-    def test_check_harness_accepts_aligned_warning_policy(self) -> None:
+    def test_check_harness_accepts_weak_policy_for_v428(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            write_harness_project(root, strict_external_code=True, lake_strict_external_code=True)
+            write_harness_project(
+                root,
+                lean_toolchain="leanprover/lean4:v4.28.0",
+                verso_ref="v4.28.0",
+                math_lint_option="weak.verso.blueprint.math.lint",
+                strict_external_code=True,
+                strict_external_code_option="weak.verso.blueprint.externalCode.strictResolve",
+                lake_strict_external_code=True,
+            )
             result = run_check(root)
             self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
             self.assertIn("status: ok", result.stdout)
 
-    def test_check_harness_rejects_strict_external_code_mismatch(self) -> None:
+    def test_check_harness_accepts_strong_policy_for_newer_refs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            write_harness_project(root, strict_external_code=True, lake_strict_external_code=False)
+            write_harness_project(
+                root,
+                lean_toolchain="leanprover/lean4:v4.29.0",
+                verso_ref="v4.29.0",
+                math_lint_option="verso.blueprint.math.lint",
+                strict_external_code=True,
+                strict_external_code_option="verso.blueprint.externalCode.strictResolve",
+                lake_strict_external_code=True,
+            )
+            result = run_check(root)
+            self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+            self.assertIn("status: ok", result.stdout)
+
+    def test_check_harness_rejects_v428_strict_external_code_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_harness_project(
+                root,
+                lean_toolchain="leanprover/lean4:v4.28.0",
+                verso_ref="v4.28.0",
+                math_lint_option="weak.verso.blueprint.math.lint",
+                strict_external_code=True,
+                strict_external_code_option="weak.verso.blueprint.externalCode.strictResolve",
+                lake_strict_external_code=False,
+            )
             result = run_check(root)
             self.assertEqual(result.returncode, 1, msg=result.stdout + result.stderr)
             self.assertIn("config:", result.stdout)
-            self.assertIn("verso.blueprint.externalCode.strictResolve", result.stdout)
+            self.assertIn("weak.verso.blueprint.externalCode.strictResolve", result.stdout)
             self.assertIn("harness.strict_external_code", result.stdout)
 
 

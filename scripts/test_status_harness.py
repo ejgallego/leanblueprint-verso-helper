@@ -212,7 +212,7 @@ class StatusHarnessTests(unittest.TestCase):
             verso_remote, verso_source, _, verso_first, verso_latest = create_remote_with_checkout(
                 root,
                 "verso",
-                branch="lean-v4.28.0",
+                branch="v4.28.0",
                 initial_files={"README.md": "verso\n"},
                 update_files={"README.md": "verso v2\n"},
             )
@@ -227,7 +227,7 @@ class StatusHarnessTests(unittest.TestCase):
                 formalization_path="Formalization",
                 lean_toolchain="leanprover/lean4:v4.28.0",
                 verso_url=str(verso_remote),
-                verso_ref="lean-v4.28.0",
+                verso_ref="v4.28.0",
                 verso_rev=verso_first,
             )
 
@@ -273,7 +273,7 @@ class StatusHarnessTests(unittest.TestCase):
             verso_remote, _, _, verso_rev, _ = create_remote_with_checkout(
                 root,
                 "verso",
-                branch="lean-v4.28.0",
+                branch="v4.28.0",
                 initial_files={"README.md": "verso\n"},
             )
             _, _, formalization_checkout, _, _ = create_remote_with_checkout(
@@ -289,7 +289,7 @@ class StatusHarnessTests(unittest.TestCase):
                 formalization_path="Formalization",
                 lean_toolchain="leanprover/lean4:v4.28.0",
                 verso_url=str(verso_remote),
-                verso_ref="lean-v4.28.0",
+                verso_ref="v4.28.0",
                 verso_rev=verso_rev,
             )
             shutil.copytree(formalization_checkout, project_root / "Formalization")

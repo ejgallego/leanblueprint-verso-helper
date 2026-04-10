@@ -60,7 +60,7 @@ chapter files under `chapter_root`, then list those files in
 `lt.default_chapters` before starting LT work.
 The `[harness]` booleans are the shared warning policy surface. Keep
 `harness.strict_external_code` aligned with the generated `lakefile.lean`
-setting `verso.blueprint.externalCode.strictResolve`, and use
+strict-resolve lean option, and use
 `harness.native_warnings` to control the default `lt_audit.py` warning-fail
 mode for focused chapter builds.
 

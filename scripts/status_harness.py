@@ -15,7 +15,11 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from _harnesslib import load_config, resolve_project_root  # noqa: E402
+from _harnesslib import (  # noqa: E402
+    default_verso_blueprint_ref,
+    load_config,
+    resolve_project_root,
+)
 
 
 VERSO_BLUEPRINT_REQUIRE_PATTERN = re.compile(
@@ -115,15 +119,6 @@ def read_verso_blueprint_dependency(project_root: Path) -> tuple[str | None, str
     if match is None:
         return None, None
     return match.group("url"), match.group("ref")
-
-
-def extract_lean_release(lean_toolchain: str) -> str:
-    value = lean_toolchain.strip()
-    return value.rsplit(":", 1)[-1] if ":" in value else value
-
-
-def default_verso_blueprint_ref(lean_toolchain: str) -> str:
-    return f"lean-{extract_lean_release(lean_toolchain)}"
 
 
 def choose_remote(repo: Path) -> str | None:
