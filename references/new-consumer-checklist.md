@@ -57,7 +57,7 @@ chapter files under `chapter_root`, then list those files in
 Use explicit chapter paths. Do not rely on helper-side discovery heuristics.
 For new ports, do not choose the Lean toolchain independently: the upstream
 formalization is authoritative, and the helper should choose the matching
-`VersoBlueprint` branch `lean-<release>`.
+`VersoBlueprint` branch `v<release>`.
 
 ## 4. Validate The Harness Shape
 
@@ -144,3 +144,8 @@ Host-owned and review-driven:
 - `BlueprintMain.lean` or the configured `blueprint_main`
 - root blueprint modules and chapter prose
 - declaration attachments and dependency metadata
+
+The generated `blueprint.yml` is a thin caller into the upstream
+`verso-blueprint` reusable Pages workflow. Refresh it after bumping the helper
+or changing the `VersoBlueprint` ref so the workflow caller stays aligned with
+the dependency actually declared in `lakefile.lean`.

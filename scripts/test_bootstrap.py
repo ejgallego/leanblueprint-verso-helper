@@ -10,6 +10,10 @@ import unittest
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPT_DIR.parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from _harnesslib import find_verso_blueprint_dependency  # noqa: E402
 
 
 class BootstrapTests(unittest.TestCase):
@@ -44,16 +48,31 @@ class BootstrapTests(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
             self.assertIn('lean-toolchain: leanprover/lean4:v4.28.0', result.stdout)
-            self.assertIn('VersoBlueprint ref: lean-v4.28.0', result.stdout)
+            self.assertIn('VersoBlueprint ref: v4.28.0', result.stdout)
+            self.assertIn('Pages workflow repo: ejgallego/verso-blueprint', result.stdout)
+            self.assertIn('Pages workflow ref: v4.28.0', result.stdout)
 
             self.assertEqual(
                 (root / 'lean-toolchain').read_text(encoding='utf-8').strip(),
                 'leanprover/lean4:v4.28.0',
             )
             lakefile = (root / 'lakefile.lean').read_text(encoding='utf-8')
-            self.assertIn('@ "lean-v4.28.0"', lakefile)
+            self.assertIn('@ "v4.28.0"', lakefile)
+            self.assertEqual(
+                find_verso_blueprint_dependency(root),
+                ('ejgallego/verso-blueprint', 'v4.28.0'),
+            )
 
             self.assertTrue((root / 'README.md').exists())
+            workflow_text = (root / '.github' / 'workflows' / 'blueprint.yml').read_text(
+                encoding='utf-8'
+            )
+            self.assertIn(
+                'uses: ejgallego/verso-blueprint/.github/workflows/blueprint-pages.yml@v4.28.0',
+                workflow_text,
+            )
+            self.assertIn('checkout_submodules: true', workflow_text)
+            self.assertIn('harness_enabled: true', workflow_text)
             config_path = root / 'verso-harness.toml'
             self.assertTrue(config_path.exists())
             config_text = config_path.read_text(encoding='utf-8')

@@ -44,6 +44,10 @@ Helper-owned for automated refresh:
 
 Use `scripts/update_ci.py` only for the helper-owned files.
 
+The generated `blueprint.yml` is intentionally thin. It calls the reusable
+Pages workflow in `verso-blueprint` and is pinned to the same
+`VersoBlueprint` ref declared in the consumer `lakefile.lean`.
+
 The generated README is a starting point for the consumer repo and remains
 project-owned after bootstrap. The helper should not rewrite it automatically
 on later updates.
@@ -88,7 +92,7 @@ The upstream formalization determines the Lean toolchain. In a consumer repo:
 
 - first update the upstream formalization to the desired revision
 - then copy or confirm the same value in the root `lean-toolchain`
-- then update the `VersoBlueprint` ref in `lakefile.lean` to the matching branch `lean-<release>`
+- then update the `VersoBlueprint` ref in `lakefile.lean` to the matching branch `v<release>`
 - then refresh caches or rebuild as needed
 - then repair any import or syntax fallout in the blueprint modules
 

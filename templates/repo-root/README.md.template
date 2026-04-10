@@ -9,7 +9,7 @@ This repository is the Verso port and integration repo for `__PROJECT_TITLE__`.
 ## Pages
 
 - Public site: configure after GitHub Pages is enabled for this repo
-- Workflow: `.github/workflows/blueprint.yml`
+- Workflow: `.github/workflows/blueprint.yml` via the upstream `verso-blueprint` reusable workflow
 - Local build: `bash ./scripts/ci-pages.sh`
 - Local output: `_out/site/html-multi/index.html`
 

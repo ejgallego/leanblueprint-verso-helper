@@ -10,6 +10,10 @@ import unittest
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPT_DIR.parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from _harnesslib import find_verso_blueprint_dependency  # noqa: E402
 
 
 def run(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -59,7 +63,9 @@ class StartNewPortTests(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
             self.assertIn('lean-toolchain: leanprover/lean4:v4.28.0', result.stdout)
-            self.assertIn('VersoBlueprint ref: lean-v4.28.0', result.stdout)
+            self.assertIn('VersoBlueprint ref: v4.28.0', result.stdout)
+            self.assertIn('Pages workflow repo: ejgallego/verso-blueprint', result.stdout)
+            self.assertIn('Pages workflow ref: v4.28.0', result.stdout)
             self.assertTrue((project / '.git').exists())
             self.assertTrue((project / '.gitmodules').exists())
             self.assertTrue((project / 'Demo').exists())
@@ -68,8 +74,21 @@ class StartNewPortTests(unittest.TestCase):
                 'leanprover/lean4:v4.28.0',
             )
             lakefile = (project / 'lakefile.lean').read_text(encoding='utf-8')
-            self.assertIn('@ "lean-v4.28.0"', lakefile)
+            self.assertIn('@ "v4.28.0"', lakefile)
+            self.assertEqual(
+                find_verso_blueprint_dependency(project),
+                ('ejgallego/verso-blueprint', 'v4.28.0'),
+            )
             self.assertTrue((project / 'README.md').exists())
+            workflow_text = (project / '.github' / 'workflows' / 'blueprint.yml').read_text(
+                encoding='utf-8'
+            )
+            self.assertIn(
+                'uses: ejgallego/verso-blueprint/.github/workflows/blueprint-pages.yml@v4.28.0',
+                workflow_text,
+            )
+            self.assertIn('checkout_submodules: true', workflow_text)
+            self.assertIn('harness_enabled: true', workflow_text)
             self.assertTrue((project / 'verso-harness.toml').exists())
             self.assertTrue((project / 'BlueprintMain.lean').exists())
             config_text = (project / 'verso-harness.toml').read_text(encoding='utf-8')

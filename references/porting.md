@@ -100,7 +100,7 @@ In practice:
 
 - save the edited module
 - run one `lean-beam sync` for that module if Beam is available
-- only escalate to `nice lake build blueprint-gen` when needed
+- only escalate to `lake build` or `bash ./scripts/ci-pages.sh` when needed
 - after a coherent batch, use `bash ./scripts/ci-pages.sh` as the site smoke
   test
 

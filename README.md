@@ -104,6 +104,9 @@ Detailed porting workflow:
 - The shared setup may change over time because it is used by more than one
   project. If `tools/verso-harness` changes unexpectedly, inspect the helper
   diff and rerun `check_harness.py`.
+- Generated `.github/workflows/blueprint.yml` files are thin callers into the
+  reusable Pages workflow shipped by `verso-blueprint` and pinned to the same
+  `VersoBlueprint` ref used in `lakefile.lean`.
 - The helper chooses the matching `VersoBlueprint` branch from the Lean
   toolchain used by the upstream math project.
 - Verso inline math opens with `$`` and closes with the final backtick alone.

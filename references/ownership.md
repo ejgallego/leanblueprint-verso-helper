@@ -30,7 +30,7 @@ Only these files are treated as helper-owned and safe to refresh
 mechanically:
 
 - `scripts/ci-pages.sh`
-- `.github/workflows/blueprint.yml`
+- `.github/workflows/blueprint.yml` as the thin caller into the upstream `verso-blueprint` reusable workflow
 
 Everything else should be reviewed and updated deliberately by Codex or a human
 after reading the helper diff.

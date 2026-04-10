@@ -30,6 +30,8 @@ This is the only startup layout for a new port.
 - it keeps the upstream formalization authoritative for `lean-toolchain`
 - it makes `verso-harness.toml` the single source of truth for package layout
 - it keeps shared helper logic in `tools/verso-harness`
+- it keeps the concrete GitHub Pages job in `verso-blueprint` rather than
+  duplicating full workflow logic in each consumer or helper
 - it matches the working `verso-flt` consumer shape
 
 ## Existing Repos

@@ -55,7 +55,7 @@ Review the helper templates and port the relevant changes manually into:
 For older projects, the main alignment points are usually:
 
 - the upstream formalization's current `lean-toolchain`
-- the matching `VersoBlueprint` branch `lean-<release>`
+- the matching `VersoBlueprint` branch `v<release>`
 - one shared `TeXPrelude.lean`
 - one coherent root blueprint package at the host root
 
@@ -85,6 +85,9 @@ python3 tools/verso-harness/scripts/lt_audit.py --project-root . path/to/Chapter
 
 Do not expect `update_ci.py` to modernize project-owned files automatically.
 That part of the retrofit is review-driven on purpose.
+The generated `blueprint.yml` is a thin caller into the upstream
+`verso-blueprint` reusable Pages workflow, so rerun `update_ci.py` after
+bumping the helper submodule or changing the `VersoBlueprint` ref.
 
 ## 8. Finish With A Coherent Validation Pass
 

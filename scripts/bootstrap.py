@@ -8,6 +8,8 @@ import stat
 import sys
 from pathlib import Path
 
+from _harnesslib import parse_github_repo_slug
+
 
 PLACEHOLDER_PATTERN = re.compile(r"__[A-Z0-9_]+__")
 IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
@@ -45,6 +47,22 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Optional override for compatibility work only. By default the helper selects "
             "the matching VersoBlueprint branch for the chosen Lean toolchain."
+        ),
+    )
+    parser.add_argument(
+        "--pages-workflow-repo",
+        default=None,
+        help=(
+            "Optional override for the reusable workflow repository. By default the helper "
+            "uses the VersoBlueprint GitHub repository."
+        ),
+    )
+    parser.add_argument(
+        "--pages-workflow-ref",
+        default=None,
+        help=(
+            "Optional override for the reusable workflow ref. By default the helper uses "
+            "the same ref chosen for the VersoBlueprint dependency."
         ),
     )
     parser.add_argument(
@@ -92,7 +110,14 @@ def extract_lean_release(lean_toolchain: str) -> str:
 
 
 def default_verso_blueprint_ref(lean_toolchain: str) -> str:
-    return f"lean-{extract_lean_release(lean_toolchain)}"
+    return extract_lean_release(lean_toolchain)
+
+
+def default_pages_workflow_repo() -> str:
+    repo = parse_github_repo_slug("https://github.com/ejgallego/verso-blueprint.git")
+    if repo is None:
+        raise SystemExit("internal error: failed to resolve default Pages workflow repo")
+    return repo
 
 
 def read_formalization_toolchain(project_root: Path, formalization_path: str) -> str:
@@ -128,6 +153,8 @@ def main() -> int:
     template_root = helper_root / "templates" / "repo-root"
     project_root = args.project_root.resolve()
     lean_toolchain, verso_blueprint_ref = resolve_harness_versions(args, project_root)
+    pages_workflow_repo = args.pages_workflow_repo or default_pages_workflow_repo()
+    pages_workflow_ref = args.pages_workflow_ref or verso_blueprint_ref
 
     replacements = {
         "__PACKAGE_NAME__": args.package_name,
@@ -137,6 +164,8 @@ def main() -> int:
         "__TEX_SOURCE_GLOB__": args.tex_source_glob,
         "__LEAN_TOOLCHAIN__": lean_toolchain,
         "__VERSO_BLUEPRINT_REF__": verso_blueprint_ref,
+        "__PAGES_WORKFLOW_REPO__": pages_workflow_repo,
+        "__PAGES_WORKFLOW_REF__": pages_workflow_ref,
     }
 
     written: list[Path] = []
@@ -166,6 +195,8 @@ def main() -> int:
     print(f"formalization path: {args.formalization_path}")
     print(f"lean-toolchain: {lean_toolchain}")
     print(f"VersoBlueprint ref: {verso_blueprint_ref}")
+    print(f"Pages workflow repo: {pages_workflow_repo}")
+    print(f"Pages workflow ref: {pages_workflow_ref}")
     print(f"written: {len(written)}")
     for path in written:
         print(f"  write {path}")

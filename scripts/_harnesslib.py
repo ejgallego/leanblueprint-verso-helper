@@ -10,6 +10,13 @@ import tomllib
 
 CONFIG_FILENAME = "verso-harness.toml"
 PACKAGE_PATTERN = re.compile(r"^\s*package\s+([A-Za-z_][A-Za-z0-9_]*)\s+where", re.M)
+GITHUB_REPO_PATTERN = re.compile(
+    r"^(?:git@github\.com:|https://github\.com/)(?P<slug>[^/]+/[^/.]+?)(?:\.git)?/?$"
+)
+VERSO_BLUEPRINT_REQUIRE_PATTERN = re.compile(
+    r'^\s*require\s+VersoBlueprint\s+from\s+git\s+"(?P<url>[^"]+)"\s*@\s*"(?P<ref>[^"]+)"',
+    re.M,
+)
 DEFAULT_LT_NODE_KIND_PAIRS = (
     ("theorem", "theorem"),
     ("definition", "definition"),
@@ -45,6 +52,27 @@ def find_package_name(project_root: Path) -> str | None:
         return None
     match = PACKAGE_PATTERN.search(lakefile.read_text(encoding="utf-8"))
     return match.group(1) if match else None
+
+
+def parse_github_repo_slug(url: str) -> str | None:
+    match = GITHUB_REPO_PATTERN.fullmatch(url.strip())
+    if match is None:
+        return None
+    return match.group("slug")
+
+
+def find_verso_blueprint_dependency(project_root: Path) -> tuple[str | None, str | None]:
+    lakefile = project_root / "lakefile.lean"
+    if not lakefile.exists():
+        return None, None
+
+    match = VERSO_BLUEPRINT_REQUIRE_PATTERN.search(lakefile.read_text(encoding="utf-8"))
+    if match is None:
+        return None, None
+
+    repo = parse_github_repo_slug(match.group("url"))
+    ref = match.group("ref")
+    return repo, ref
 
 
 def require_relative_path(value: str, field_name: str) -> str:
