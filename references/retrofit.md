@@ -25,9 +25,9 @@ That file is the source of truth for:
 - `chapter_root`
 - `tex_source_glob`
 - `lt.default_chapters`
-- `harness.non_port_chapters`
 
 The helper does not guess those values for managed repos.
+Use `lt.default_chapters` for the real direct-port LT targets.
 
 ## 3. Refresh The Helper-Owned Files
 

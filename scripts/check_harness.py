@@ -79,7 +79,6 @@ def main() -> int:
             Path(f"{config.blueprint_main}.lean"),
             Path(f"{config.package_name}.lean"),
             Path(config.package_name) / "TeXPrelude.lean",
-            Path(config.chapter_root) / "Introduction.lean",
         ]:
             if not (project_root / relative).exists():
                 missing.append(relative)
@@ -90,8 +89,6 @@ def main() -> int:
                 path.relative_to(project_root)
                 for path in chapter_dir.glob("*.lean")
             )
-        if not chapter_paths:
-            missing.append(Path(config.chapter_root) / "<at least one .lean file>")
 
         for relative in [Path(path) for path in config.lt_default_chapters]:
             if not (project_root / relative).exists():
@@ -108,7 +105,6 @@ def main() -> int:
                 Path(config.formalization_path),
                 Path(f"{config.package_name}.lean"),
                 Path(config.package_name) / "TeXPrelude.lean",
-                Path(config.chapter_root) / "Introduction.lean",
             ]
         )
     placeholder_targets.extend(chapter_paths)

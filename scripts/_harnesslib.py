@@ -164,7 +164,7 @@ def load_config(project_root: Path) -> HarnessConfig:
         lt_section,
         "default_chapters",
         "lt.default_chapters",
-        allow_empty=False,
+        allow_empty=True,
     )
     lt_node_kind_pairs = load_lt_node_kind_pairs(lt_section)
     for chapter in lt_default_chapters:

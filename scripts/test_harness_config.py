@@ -30,10 +30,7 @@ def write_config(
                 f'tex_source_glob = "{tex_source_glob}"',
                 '',
                 '[lt]',
-                'default_chapters = ["DemoBlueprint/Chapters/Introduction.lean"]',
-                '',
-                '[harness]',
-                'non_port_chapters = ["DemoBlueprint/Chapters/PortingStatus.lean"]',
+                'default_chapters = []',
                 '',
             ]
         ),
@@ -49,10 +46,7 @@ class HarnessConfigTests(unittest.TestCase):
             config = load_config(root)
             self.assertEqual(config.package_name, 'DemoBlueprint')
             self.assertEqual(config.chapter_root, 'DemoBlueprint/Chapters')
-            self.assertEqual(
-                config.lt_default_chapters,
-                ('DemoBlueprint/Chapters/Introduction.lean',),
-            )
+            self.assertEqual(config.lt_default_chapters, ())
             self.assertEqual(
                 config.lt_node_kind_pairs,
                 (
@@ -105,6 +99,19 @@ class HarnessConfigTests(unittest.TestCase):
             with self.assertRaises(SystemExit) as exc:
                 resolve_chapter_paths(root, [Path('Demo.lean')])
             self.assertIn('missing required verso-harness.toml', str(exc.exception))
+
+    def test_legacy_non_port_chapters_is_still_accepted(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_config(root)
+            config_path = root / 'verso-harness.toml'
+            config_path.write_text(
+                config_path.read_text(encoding='utf-8')
+                + '\n[harness]\nnon_port_chapters = ["DemoBlueprint/Chapters/Legacy.lean"]\n',
+                encoding='utf-8',
+            )
+            config = load_config(root)
+            self.assertEqual(config.non_port_chapters, ('DemoBlueprint/Chapters/Legacy.lean',))
 
 
 if __name__ == '__main__':

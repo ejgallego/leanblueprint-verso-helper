@@ -54,18 +54,21 @@ python3 tools/verso-harness/scripts/start_new_port.py \
 After the script finishes:
 
 1. confirm that `lean-toolchain` at repo root matches the upstream formalization
-2. confirm that `lakefile.lean` points to the matching `VersoBlueprint` branch `lean-<release>`
+2. confirm that `lakefile.lean` points to the matching `VersoBlueprint` branch `v<release>`
 3. review `verso-harness.toml` and verify that `formalization_path` matches the
    upstream submodule path
 4. review `verso-harness.toml` and verify that `tex_source_glob` points at the
    real TeX source locator; some projects use a multi-file pattern such as
    `./blueprint/src/chapter/*.tex`, while others use a single file such as
    `./blueprint/src/chapter/main.tex`
-5. set `lt.default_chapters` explicitly
-6. run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`
-7. copy `tools/verso-harness/snippets/AGENTS.host.md` into `AGENTS.md`
-8. choose the first direct-port chapter from `lt.default_chapters`
-9. open Codex CLI and issue the first porting prompt for one coherent section of that chapter
+5. review `.github/workflows/blueprint.yml` and note that it is a thin caller
+   pinned to the same `VersoBlueprint` ref declared in `lakefile.lean`
+6. create the first real source-backed chapter file under `chapter_root`
+7. set `lt.default_chapters` explicitly
+8. run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`
+9. copy `tools/verso-harness/snippets/AGENTS.host.md` into `AGENTS.md`
+10. choose the first direct-port chapter from `lt.default_chapters`
+11. open Codex CLI and issue the first porting prompt for one coherent section of that chapter
 
 ## Start-Port Prompt
 

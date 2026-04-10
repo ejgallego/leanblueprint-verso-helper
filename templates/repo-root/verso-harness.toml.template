@@ -5,9 +5,8 @@ chapter_root = "__PACKAGE_NAME__/Chapters"
 tex_source_glob = "__TEX_SOURCE_GLOB__"
 
 [lt]
-default_chapters = [
-  "__PACKAGE_NAME__/Chapters/Introduction.lean",
-]
+# Add real direct-port chapter files here once they exist in the host repo.
+default_chapters = []
 
 [lt.node_kinds]
 theorem = "theorem"
@@ -15,8 +14,3 @@ definition = "definition"
 lemma = "lemma_"
 corollary = "corollary"
 proof = "proof"
-
-[harness]
-non_port_chapters = [
-  "__PACKAGE_NAME__/Chapters/PortingStatus.lean",
-]

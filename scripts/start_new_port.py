@@ -133,7 +133,10 @@ def run_bootstrap(args: argparse.Namespace, project_root: Path, formalization_pa
 def print_next_steps(project_root: Path) -> None:
     print("\nNext steps:")
     print("1. Confirm the upstream formalization lean-toolchain was copied to the root.")
-    print(f"2. Review {project_root / 'verso-harness.toml'} and set lt.default_chapters explicitly.")
+    print(
+        f"2. Review {project_root / 'verso-harness.toml'}, add your first real chapter file(s) "
+        "under chapter_root, and set lt.default_chapters explicitly."
+    )
     print("3. Run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`.")
     print("4. Copy the host guidance from `tools/verso-harness/snippets/AGENTS.host.md` into `AGENTS.md`.")
     print("5. Start the first LT pass using `references/start-new-port.md`.")

@@ -37,11 +37,15 @@ python3 tools/verso-harness/scripts/start_new_port.py \
 
 After that:
 1. review `verso-harness.toml`
-2. set `lt.default_chapters`
-3. run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`
-4. copy `tools/verso-harness/snippets/AGENTS.host.md` into `AGENTS.md`
-5. choose the first direct-port chapter from `lt.default_chapters`
-6. open Codex CLI and issue the first porting prompt for one coherent section of that chapter
+2. add your first real chapter file under `chapter_root`
+3. set `lt.default_chapters`
+4. run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`
+5. copy `tools/verso-harness/snippets/AGENTS.host.md` into `AGENTS.md`
+6. choose the first direct-port chapter from `lt.default_chapters`
+7. open Codex CLI and issue the first porting prompt for one coherent section of that chapter
+
+The startup flow intentionally does not generate synthetic chapter prose.
+`lt.default_chapters` is only for real source-backed direct-port chapters.
 
 ## The Three Main Rules
 
@@ -71,7 +75,7 @@ Then check that the repo still matches the expected shared setup:
 python3 tools/verso-harness/scripts/check_harness.py --project-root .
 ```
 
-Run the main chapter-audit commands:
+Run the main direct-port chapter audit commands:
 
 ```bash
 python3 tools/verso-harness/scripts/check_lt_source_pairs.py --project-root . path/to/Chapter.lean

@@ -62,17 +62,12 @@ class BootstrapTests(unittest.TestCase):
             self.assertIn('formalization_path = "./Demo"', config_text)
             self.assertIn('chapter_root = "DemoBlueprint/Chapters"', config_text)
             self.assertIn('tex_source_glob = "./blueprint/src/chapter/main.tex"', config_text)
+            self.assertIn('default_chapters = []', config_text)
             self.assertIn('[lt.node_kinds]', config_text)
             self.assertIn('proof = "proof"', config_text)
-
-            status_text = (root / 'DemoBlueprint' / 'Chapters' / 'PortingStatus.lean').read_text(
-                encoding='utf-8'
-            )
-            self.assertIn(
-                'The current TeX source locator for the prose structure is',
-                status_text,
-            )
-            self.assertIn('./blueprint/src/chapter/main.tex', status_text)
+            chapter_dir = root / 'DemoBlueprint' / 'Chapters'
+            if chapter_dir.exists():
+                self.assertEqual(list(chapter_dir.glob('*.lean')), [])
 
             check = subprocess.run(
                 [

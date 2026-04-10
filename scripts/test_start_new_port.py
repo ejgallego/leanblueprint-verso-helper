@@ -77,8 +77,12 @@ class StartNewPortTests(unittest.TestCase):
                 'tex_source_glob = "./blueprint/src/chapter/main.tex"',
                 config_text,
             )
+            self.assertIn('default_chapters = []', config_text)
             self.assertIn('[lt.node_kinds]', config_text)
             self.assertIn('proof = "proof"', config_text)
+            chapter_dir = project / 'DemoBlueprint' / 'Chapters'
+            if chapter_dir.exists():
+                self.assertEqual(list(chapter_dir.glob('*.lean')), [])
 
             check = run(
                 [

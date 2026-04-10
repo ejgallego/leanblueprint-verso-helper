@@ -24,10 +24,7 @@ chapter_root = \"DemoBlueprint/Chapters\"
 tex_source_glob = \"./blueprint/src/chapter/main.tex\"
 
 [lt]
-default_chapters = [\"DemoBlueprint/Chapters/Introduction.lean\"]
-
-[harness]
-non_port_chapters = []
+default_chapters = []
 """,
                 encoding="utf-8",
             )

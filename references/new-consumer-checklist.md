@@ -34,9 +34,7 @@ chapter_root = "MyProjectBlueprint/Chapters"
 tex_source_glob = "./blueprint/src/chapter/main.tex"
 
 [lt]
-default_chapters = [
-  "MyProjectBlueprint/Chapters/Introduction.lean",
-]
+default_chapters = []
 
 [lt.node_kinds]
 theorem = "theorem"
@@ -44,11 +42,6 @@ definition = "definition"
 lemma = "lemma_"
 corollary = "corollary"
 proof = "proof"
-
-[harness]
-non_port_chapters = [
-  "MyProjectBlueprint/Chapters/PortingStatus.lean",
-]
 ```
 
 Use the actual relative TeX source locator here. Some projects use a single
@@ -57,6 +50,9 @@ pattern such as `./blueprint/src/chapter/*.tex`.
 The `[lt.node_kinds]` table is the shared graph-kind policy surface. Keep it
 aligned with the consumer's actual TeX environment names if the project needs
 to extend the default theorem/definition/lemma/corollary/proof mapping.
+Do not seed the harness with synthetic chapter prose. Add real source-backed
+chapter files under `chapter_root`, then list those files in
+`lt.default_chapters` before starting LT work.
 
 Use explicit chapter paths. Do not rely on helper-side discovery heuristics.
 For new ports, do not choose the Lean toolchain independently: the upstream

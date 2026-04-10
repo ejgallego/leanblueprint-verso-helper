@@ -9,14 +9,14 @@ If `lean-beam` is available:
 
 ```bash
 lean-beam ensure .
-lean-beam sync "MyProjectBlueprint/Chapters/Introduction.lean"
+lean-beam sync "path/to/Chapter.lean"
 ```
 
 Useful follow-up probes include:
 
 ```bash
-lean-beam hover "MyProjectBlueprint/Chapters/Introduction.lean" 20 10
-lean-beam run-at "MyProjectBlueprint/Chapters/Introduction.lean" 20 10
+lean-beam hover "path/to/Chapter.lean" 20 10
+lean-beam run-at "path/to/Chapter.lean" 20 10
 ```
 
 ## Concurrency Caution

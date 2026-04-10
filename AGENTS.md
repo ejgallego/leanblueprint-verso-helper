@@ -42,6 +42,7 @@ a host Lean project that is porting a `leanblueprint` or TeX blueprint source to
   single file such as `./blueprint/src/chapter/main.tex`; do not assume either
   layout without checking.
 - Prefer faithful TeX-to-Verso translation over editorial rewriting.
+- Treat chapters listed in `lt.default_chapters` as the direct-port LT scope.
 - Do not trust older pass labels by themselves. A chapter is not LT-audited
   under the current method until each translated informal block has an adjacent
   local `tex` witness.

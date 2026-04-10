@@ -17,8 +17,8 @@
 - Treat the legacy TeX or `leanblueprint` source as the prose source of truth.
 - Record the real TeX chapter source locator for this repo. The common legacy
   layout is `./blueprint/src/chapter/*.tex`, but some projects use a single
-  file such as `./blueprint/src/chapter/main.tex`; verify it before wiring
-  status pages or source-backed notes.
+  file such as `./blueprint/src/chapter/main.tex`; verify it before porting.
+- Treat chapters in `lt.default_chapters` as the direct-port LT scope.
 - The default deliverable for direct-port chapters is an LT pass. Do not trust
   older LT labels by themselves; every translated informal block now needs an
   adjacent local `tex` witness.

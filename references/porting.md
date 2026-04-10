@@ -45,11 +45,12 @@ For the in-place path, copy the template ideas manually:
 - one root blueprint module
 - one `BlueprintMain.lean`
 - one shared `TeXPrelude.lean`
-- one starter chapter
-- optionally one harness-native `PortingStatus` chapter or source-backed task
-  board
+- one or more real source-backed chapter files
 - one site-generation smoke test
 - one Pages workflow
+
+Do not add synthetic starter chapters. Treat `lt.default_chapters` as the
+direct-port LT scope and populate it only with real source-backed chapter files.
 
 ## 4. Port Chapter Content Incrementally
 
@@ -140,14 +141,3 @@ summary:
 - reordered material
 - invented nodes
 - editorial notes
-
-## 9. Keep A Fidelity Surface
-
-Consider keeping one of these harness-native tracking surfaces:
-
-- a `PortingStatus.lean` chapter that records chapter-by-chapter fidelity state
-- a source-backed task board generated from the TeX source markers
-
-The exact mechanism is project-specific, but the key point is to keep the local
-harness close to the TeX source of truth rather than relying on stale free-form
-notes.
