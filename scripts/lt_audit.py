@@ -328,6 +328,11 @@ def main() -> int:
         action="store_true",
         help="Also run the conservative Verso math-delimiter checker on each touched chapter.",
     )
+    parser.add_argument(
+        "--heading-structure",
+        action="store_true",
+        help="Also run the section/subsection heading-structure checker on each touched chapter.",
+    )
     native_warning_group = parser.add_mutually_exclusive_group()
     native_warning_group.add_argument(
         "--native-warnings",
@@ -370,6 +375,7 @@ def main() -> int:
     similarity_script = str(SCRIPT_DIR / "check_lt_similarity.py")
     node_kind_script = str(SCRIPT_DIR / "check_blueprint_node_kinds.py")
     math_script = str(SCRIPT_DIR / "check_verso_math_delimiters.py")
+    heading_script = str(SCRIPT_DIR / "check_blueprint_heading_structure.py")
 
     for path in paths:
         print(f"\n== {path}")
@@ -421,6 +427,15 @@ def main() -> int:
             )
             print_step(math_result)
             overall_ok &= math_result.ok
+
+        if args.heading_structure:
+            heading_result = run_step(
+                project_root,
+                "heading structure check",
+                [sys.executable, heading_script, "--project-root", str(project_root), str(path)],
+            )
+            print_step(heading_result)
+            overall_ok &= heading_result.ok
 
         if not args.no_build:
             module = lean_file_to_module(project_root, path)
