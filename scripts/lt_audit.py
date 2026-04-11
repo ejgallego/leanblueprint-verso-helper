@@ -23,13 +23,17 @@ from _harnesslib import (  # noqa: E402
 WARNING_WITH_POSITION_PATTERN = re.compile(
     r"^(?P<path>.+?):(?P<line>\d+):(?P<column>\d+):\s+warning:\s*(?P<message>.*)$"
 )
+WARNING_PREFIXED_WITH_POSITION_PATTERN = re.compile(
+    r"^warning:\s*(?P<path>.+?):(?P<line>\d+):(?P<column>\d+):\s*(?P<message>.*)$"
+)
 WARNING_WITH_PATH_PATTERN = re.compile(
     r"^(?P<path>.+?):\s+warning:\s*(?P<message>.*)$"
 )
-WARNING_PREFIXED_POSITION_PATTERN = re.compile(
-    r"^warning:\s*(?P<path>.+?):(?P<line>\d+):(?P<column>\d+):\s*(?P<message>.*)$"
-)
 WARNING_WITHOUT_PATH_PATTERN = re.compile(r"^warning:\s*(?P<message>.*)$")
+MISSING_DOCSTRING_MESSAGE_PATTERN = re.compile(r"^'[^']+' is not documented\.$")
+DOCSTRING_HINT_LINE = (
+    "Set option 'verso.docstring.allowMissing' to 'false' to disallow missing docstrings."
+)
 WARNING_SUMMARY_SAMPLE_LIMIT = 3
 
 
@@ -108,14 +112,28 @@ def parse_warning_line(line: str) -> tuple[str | None, str] | None:
         return None
     for pattern in (
         WARNING_WITH_POSITION_PATTERN,
+        WARNING_PREFIXED_WITH_POSITION_PATTERN,
         WARNING_WITH_PATH_PATTERN,
-        WARNING_PREFIXED_POSITION_PATTERN,
         WARNING_WITHOUT_PATH_PATTERN,
     ):
         match = pattern.match(stripped)
         if match is not None:
             return match.groupdict().get("path"), stripped
     return None
+
+
+def is_missing_docstring_warning(line: str) -> bool:
+    stripped = line.strip()
+    for pattern in (
+        WARNING_WITH_POSITION_PATTERN,
+        WARNING_PREFIXED_WITH_POSITION_PATTERN,
+        WARNING_WITH_PATH_PATTERN,
+        WARNING_WITHOUT_PATH_PATTERN,
+    ):
+        match = pattern.match(stripped)
+        if match is not None:
+            return MISSING_DOCSTRING_MESSAGE_PATTERN.fullmatch(match.group("message")) is not None
+    return False
 
 
 def classify_warning_owner(
@@ -187,7 +205,11 @@ def collect_native_warning_records(
                 NativeWarningRecord(
                     line=rendered_line,
                     raw_path=raw_path,
-                    owner=classify_warning_owner(project_root, formalization_path, raw_path),
+                    owner=(
+                        "docstring"
+                        if is_missing_docstring_warning(rendered_line)
+                        else classify_warning_owner(project_root, formalization_path, raw_path)
+                    ),
                 )
             )
     return records
@@ -198,6 +220,7 @@ def warning_owner_groups(records: list[NativeWarningRecord]) -> dict[str, list[N
         "consumer": [],
         "upstream": [],
         "external": [],
+        "docstring": [],
     }
     for record in records:
         groups.setdefault(record.owner, []).append(record)
@@ -205,6 +228,8 @@ def warning_owner_groups(records: list[NativeWarningRecord]) -> dict[str, list[N
 
 
 def warning_record_is_failing(record: NativeWarningRecord, scope: str) -> bool:
+    if record.owner == "docstring":
+        return False
     return scope == "all" or record.owner == "consumer"
 
 
@@ -231,6 +256,7 @@ def print_native_warning_summary(records: list[NativeWarningRecord], scope: str)
         ("consumer", "consumer-owned"),
         ("upstream", "upstream-transitive"),
         ("external", "external-dependency"),
+        ("docstring", "docstring-only"),
     )
     for owner, label in labels:
         owner_records = groups[owner]
@@ -423,13 +449,15 @@ def main() -> int:
                 )
                 build_ok = native_warning_check_ok(
                     build_result,
-                    warning_records,
-                    args.native_warnings_scope,
-                )
-                skip_warning_lines = {record.line for record in warning_records} if warning_records else None
-                print_step(build_result, ok_override=build_ok, skip_lines=skip_warning_lines)
-                print_native_warning_summary(warning_records, args.native_warnings_scope)
-                overall_ok &= build_ok
+                warning_records,
+                args.native_warnings_scope,
+            )
+            skip_warning_lines = {record.line for record in warning_records} if warning_records else None
+            if warning_records and any(record.owner == "docstring" for record in warning_records):
+                skip_warning_lines = (skip_warning_lines or set()) | {DOCSTRING_HINT_LINE}
+            print_step(build_result, ok_override=build_ok, skip_lines=skip_warning_lines)
+            print_native_warning_summary(warning_records, args.native_warnings_scope)
+            overall_ok &= build_ok
 
     if args.pages:
         print("\n== pages")

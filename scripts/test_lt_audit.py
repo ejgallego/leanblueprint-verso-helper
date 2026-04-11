@@ -21,6 +21,7 @@ from lt_audit import (  # noqa: E402
     classify_warning_owner,
     collect_native_warning_records,
     effective_native_warnings,
+    is_missing_docstring_warning,
     native_warning_check_ok,
     parse_warning_line,
     StepResult,
@@ -100,6 +101,10 @@ class LtAuditTests(unittest.TestCase):
                 "Noperthedron/SolutionTable/Basic.lean",
                 "warning: Noperthedron/SolutionTable/Basic.lean:20:4: declaration uses `sorry`",
             ),
+        )
+        self.assertEqual(
+            parse_warning_line("warning: DemoBlueprint/Chapters/Intro.lean:12:3: demo"),
+            ("DemoBlueprint/Chapters/Intro.lean", "warning: DemoBlueprint/Chapters/Intro.lean:12:3: demo"),
         )
         self.assertEqual(
             parse_warning_line("warning: declaration uses 'sorry'"),
@@ -343,6 +348,29 @@ class LtAuditTests(unittest.TestCase):
             self.assertIn("upstream-transitive: 1 (failing)", output)
             self.assertIn("external-dependency: 1 (failing)", output)
             self.assertIn("Overall: FAIL", output)
+
+    def test_missing_docstring_warnings_are_classified_separately(self) -> None:
+        line = "warning: DemoBlueprint/Chapters/Intro.lean:12:3: 'Demo.Struct.field' is not documented."
+        self.assertTrue(is_missing_docstring_warning(line))
+
+        project_root = Path("/tmp/demo-project")
+        result = StepResult(
+            name="chapter build",
+            command=["nice", "lake", "build", "DemoBlueprint.Chapters.Intro"],
+            returncode=0,
+            stdout="",
+            stderr="\n".join(
+                [
+                    line,
+                    "Set option 'verso.docstring.allowMissing' to 'false' to disallow missing docstrings.",
+                ]
+            ),
+        )
+        records = collect_native_warning_records(project_root, "Demo", result)
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0].owner, "docstring")
+        self.assertTrue(native_warning_check_ok(result, records, "consumer"))
+        self.assertTrue(native_warning_check_ok(result, records, "all"))
 
     def test_help_mentions_native_warnings(self) -> None:
         result = subprocess.run(
