@@ -44,12 +44,11 @@ def write_harness_project(
                 'tex_source_glob = "./blueprint/src/chapter/main.tex"',
                 "",
                 "[lt]",
-                'default_chapters = ["DemoBlueprint/Chapters/Introduction.lean"]',
+                'default_chapters = ["DemoBlueprint/Chapters/SourceChapter.lean"]',
                 "",
                 "[harness]",
                 'native_warnings = false',
                 f"strict_external_code = {'true' if strict_external_code else 'false'}",
-                'non_port_chapters = ["DemoBlueprint/Chapters/PortingStatus.lean"]',
                 "",
             ]
         )
@@ -83,12 +82,8 @@ def write_harness_project(
     write_file(root / "DemoBlueprint.lean", "import DemoBlueprint.TeXPrelude\n")
     write_file(root / "DemoBlueprint" / "TeXPrelude.lean", "import VersoBlueprint\n")
     write_file(
-        root / "DemoBlueprint" / "Chapters" / "Introduction.lean",
-        '#doc (Manual) "Introduction" =>\n\nIntro.\n',
-    )
-    write_file(
-        root / "DemoBlueprint" / "Chapters" / "PortingStatus.lean",
-        '#doc (Manual) "Porting Status" =>\n\nStatus.\n',
+        root / "DemoBlueprint" / "Chapters" / "SourceChapter.lean",
+        '#doc (Manual) "Source Chapter" =>\n\nAlpha.\n',
     )
     write_file(root / "scripts" / "ci-pages.sh", "#!/usr/bin/env bash\nexit 0\n", executable=True)
     write_file(

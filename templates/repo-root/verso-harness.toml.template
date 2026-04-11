@@ -18,4 +18,3 @@ proof = "proof"
 [harness]
 native_warnings = false
 strict_external_code = true
-non_port_chapters = []

@@ -35,16 +35,16 @@ STATE_SORT_KEY = {
     "paired": 2,
     "lt-audited": 3,
     "metadata-clean": 4,
-    "done": 5,
-    "non-port": 6,
+    "build-failing": 5,
+    "done": 6,
 }
 STATE_LABELS = (
     "done",
+    "build-failing",
     "metadata-clean",
     "lt-audited",
     "paired",
     "unpaired",
-    "non-port",
     "untracked",
 )
 
@@ -77,7 +77,6 @@ def selected_paths(
     *,
     chapter_root: str,
     lt_default_chapters: tuple[str, ...],
-    non_port_chapters: tuple[str, ...],
     raw_paths: list[Path],
 ) -> list[Path]:
     if raw_paths:
@@ -89,11 +88,8 @@ def selected_paths(
                 selected.append(raw_path)
         return sorted(dict.fromkeys(selected))
 
-    combined = (
-        chapter_root_paths(project_root, chapter_root)
-        + [Path(path) for path in lt_default_chapters]
-        + [Path(path) for path in non_port_chapters]
-    )
+    discovered = chapter_root_paths(project_root, chapter_root) if chapter_root != "." else []
+    combined = discovered + [Path(path) for path in lt_default_chapters]
     return sorted(dict.fromkeys(combined))
 
 
@@ -269,7 +265,7 @@ def classify_direct_port(
         native_warnings=native_warnings,
         native_warnings_scope=native_warnings_scope,
     )
-    state = "done" if build_ok else "metadata-clean"
+    state = "done" if build_ok else "build-failing"
     return CompletionStatus(
         relative_path=relative_path,
         scope="direct-port",
@@ -296,24 +292,7 @@ def classify_chapter(
     native_warnings: bool,
     native_warnings_scope: str,
     direct_port_paths: set[Path],
-    non_port_paths: set[Path],
 ) -> CompletionStatus:
-    if relative_path in non_port_paths:
-        return CompletionStatus(
-            relative_path=relative_path,
-            scope="non-port",
-            state="non-port",
-            pair_count=0,
-            low_similarity=0,
-            metadata_dirty=0,
-            label_issues=0,
-            node_kind_issues=0,
-            math_issues=0,
-            build_checked=False,
-            build_ok=None,
-            reasons=("excluded by harness.non_port_chapters",),
-        )
-
     if relative_path not in direct_port_paths:
         return CompletionStatus(
             relative_path=relative_path,
@@ -327,7 +306,7 @@ def classify_chapter(
             math_issues=0,
             build_checked=False,
             build_ok=None,
-            reasons=("present under chapter_root but not listed in lt.default_chapters or harness.non_port_chapters",),
+            reasons=("present under chapter_root but not listed in lt.default_chapters",),
         )
 
     return classify_direct_port(
@@ -359,7 +338,14 @@ def print_status(status: CompletionStatus) -> None:
 
 def report_complete(statuses: list[CompletionStatus]) -> bool:
     for status in statuses:
-        if status.state in {"untracked", "unpaired", "paired", "lt-audited", "metadata-clean"}:
+        if status.state in {
+            "untracked",
+            "unpaired",
+            "paired",
+            "lt-audited",
+            "metadata-clean",
+            "build-failing",
+        }:
             return False
     return True
 
@@ -373,7 +359,7 @@ def main() -> int:
         description=(
             "Repo-level completion dashboard for chapter scope and LT progress. "
             "This classifies configured direct-port chapters as unpaired, paired, "
-            "lt-audited, metadata-clean, or done, and also reports non-port and "
+            "lt-audited, metadata-clean, build-failing, or done, and also reports "
             "untracked chapter files under chapter_root."
         )
     )
@@ -383,7 +369,7 @@ def main() -> int:
         type=Path,
         help=(
             "Optional specific chapter files. Defaults to every .lean file under chapter_root "
-            "together with configured lt.default_chapters and harness.non_port_chapters."
+            "together with configured lt.default_chapters."
         ),
     )
     parser.add_argument(
@@ -436,7 +422,6 @@ def main() -> int:
         project_root,
         chapter_root=config.chapter_root,
         lt_default_chapters=config.lt_default_chapters,
-        non_port_chapters=config.non_port_chapters,
         raw_paths=args.paths,
     )
     native_warnings = effective_native_warnings(config.native_warnings, args.native_warnings)
@@ -446,7 +431,6 @@ def main() -> int:
         return 2
 
     direct_port_paths = {Path(path) for path in config.lt_default_chapters}
-    non_port_paths = {Path(path) for path in config.non_port_chapters}
     statuses = [
         classify_chapter(
             project_root,
@@ -457,7 +441,6 @@ def main() -> int:
             native_warnings=native_warnings,
             native_warnings_scope=args.native_warnings_scope,
             direct_port_paths=direct_port_paths,
-            non_port_paths=non_port_paths,
         )
         for relative_path in paths
     ]

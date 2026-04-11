@@ -46,7 +46,6 @@ class HarnessConfig:
     lt_node_kind_pairs: tuple[tuple[str, str], ...]
     native_warnings: bool
     strict_external_code: bool
-    non_port_chapters: tuple[str, ...]
 
 
 def resolve_project_root(raw: Path | None) -> Path:
@@ -118,7 +117,7 @@ def verso_warn_line_length_option_name(ref: str | None) -> str:
     return verso_blueprint_option_name(ref, "code.warnLineLength")
 
 
-def find_verso_blueprint_dependency(project_root: Path) -> tuple[str | None, str | None]:
+def read_verso_blueprint_requirement(project_root: Path) -> tuple[str | None, str | None]:
     lakefile = project_root / "lakefile.lean"
     if not lakefile.exists():
         return None, None
@@ -127,8 +126,15 @@ def find_verso_blueprint_dependency(project_root: Path) -> tuple[str | None, str
     if match is None:
         return None, None
 
-    repo = parse_github_repo_slug(match.group("url"))
-    ref = match.group("ref")
+    return match.group("url"), match.group("ref")
+
+
+def find_verso_blueprint_dependency(project_root: Path) -> tuple[str | None, str | None]:
+    url, ref = read_verso_blueprint_requirement(project_root)
+    if url is None or ref is None:
+        return None, None
+
+    repo = parse_github_repo_slug(url)
     return repo, ref
 
 
@@ -297,21 +303,15 @@ def load_config(project_root: Path) -> HarnessConfig:
         if "strict_external_code" in harness_section
         else DEFAULT_STRICT_EXTERNAL_CODE
     )
-    non_port_chapters = (
-        require_string_list(
-            harness_section,
-            "non_port_chapters",
-            "harness.non_port_chapters",
-            allow_empty=True,
+    if "non_port_chapters" in harness_section:
+        raise SystemExit(
+            f"{CONFIG_FILENAME}: harness.non_port_chapters is no longer supported; "
+            "every chapter under chapter_root must correspond to upstream TeX source "
+            "and be listed in lt.default_chapters"
         )
-        if "non_port_chapters" in harness_section
-        else ()
-    )
-    for chapter in non_port_chapters:
-        require_relative_path(chapter, "harness.non_port_chapters")
 
     chapter_root_path = Path(chapter_root)
-    for chapter in (*lt_default_chapters, *non_port_chapters):
+    for chapter in lt_default_chapters:
         chapter_path = Path(chapter)
         if chapter_root_path != Path(".") and chapter_root_path not in chapter_path.parents:
             raise SystemExit(
@@ -328,7 +328,6 @@ def load_config(project_root: Path) -> HarnessConfig:
         lt_node_kind_pairs=lt_node_kind_pairs,
         native_warnings=native_warnings,
         strict_external_code=strict_external_code,
-        non_port_chapters=non_port_chapters,
     )
 
 

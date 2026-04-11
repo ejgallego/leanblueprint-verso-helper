@@ -132,10 +132,6 @@ def main() -> int:
         for relative in [Path(path) for path in config.lt_default_chapters]:
             if not (project_root / relative).exists():
                 missing.append(relative)
-        for relative in [Path(path) for path in config.non_port_chapters]:
-            if not (project_root / relative).exists():
-                missing.append(relative)
-
     placeholder_targets = required.copy()
     if config is not None:
         placeholder_targets.extend(

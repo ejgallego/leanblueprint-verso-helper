@@ -45,10 +45,6 @@ class StatusCompletionTests(unittest.TestCase):
                     '  "DemoBlueprint/Chapters/Unpaired.lean",',
                     ']',
                     "",
-                    "[harness]",
-                    "native_warnings = false",
-                    'non_port_chapters = ["DemoBlueprint/Chapters/PortingStatus.lean"]',
-                    "",
                 ]
             )
             + "\n",
@@ -112,10 +108,6 @@ class StatusCompletionTests(unittest.TestCase):
             ),
         )
         write_file(
-            root / "DemoBlueprint" / "Chapters" / "PortingStatus.lean",
-            '#doc (Manual) "Porting Status" =>\n\nStatus only.\n',
-        )
-        write_file(
             root / "DemoBlueprint" / "Chapters" / "Scratch.lean",
             '#doc (Manual) "Scratch" =>\n\nScratch.\n',
         )
@@ -154,13 +146,11 @@ class StatusCompletionTests(unittest.TestCase):
             self.assertIn("  lt-audited: 1", result.stdout)
             self.assertIn("  paired: 1", result.stdout)
             self.assertIn("  unpaired: 1", result.stdout)
-            self.assertIn("  non-port: 1", result.stdout)
             self.assertIn("  untracked: 1", result.stdout)
             self.assertIn("[metadata-clean] DemoBlueprint/Chapters/Clean.lean", result.stdout)
             self.assertIn("[lt-audited] DemoBlueprint/Chapters/Metadata.lean", result.stdout)
             self.assertIn("[paired] DemoBlueprint/Chapters/Low.lean", result.stdout)
             self.assertIn("[unpaired] DemoBlueprint/Chapters/Unpaired.lean", result.stdout)
-            self.assertIn("[non-port] DemoBlueprint/Chapters/PortingStatus.lean", result.stdout)
             self.assertIn("[untracked] DemoBlueprint/Chapters/Scratch.lean", result.stdout)
 
     def test_status_completion_can_require_build_clean_done_state(self) -> None:
@@ -178,10 +168,6 @@ class StatusCompletionTests(unittest.TestCase):
                         "",
                         "[lt]",
                         'default_chapters = ["DemoBlueprint/Chapters/Clean.lean"]',
-                        "",
-                        "[harness]",
-                        "native_warnings = false",
-                        "non_port_chapters = []",
                         "",
                     ]
                 )
@@ -219,6 +205,102 @@ class StatusCompletionTests(unittest.TestCase):
             self.assertIn("  done: 1", output)
             self.assertIn("  complete: yes", output)
             self.assertIn("[done] DemoBlueprint/Chapters/Clean.lean", output)
+
+    def test_status_completion_reports_build_failures_as_distinct_state(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_file(
+                root / "verso-harness.toml",
+                "\n".join(
+                    [
+                        'package_name = "DemoBlueprint"',
+                        'blueprint_main = "BlueprintMain"',
+                        'formalization_path = "Demo"',
+                        'chapter_root = "DemoBlueprint/Chapters"',
+                        'tex_source_glob = "./blueprint/src/chapter/main.tex"',
+                        "",
+                        "[lt]",
+                        'default_chapters = ["DemoBlueprint/Chapters/Clean.lean"]',
+                        "",
+                    ]
+                )
+                + "\n",
+            )
+            write_file(
+                root / "DemoBlueprint" / "Chapters" / "Clean.lean",
+                '#doc (Manual) "Clean" =>\n\nAlpha beta.\n```tex\nAlpha beta.\n```\n',
+            )
+            (root / "Demo").mkdir(parents=True, exist_ok=True)
+
+            argv = [
+                "status_completion.py",
+                "--project-root",
+                str(root),
+                "--build",
+            ]
+            with patch(
+                "status_completion.run_step",
+                return_value=StepResult(
+                    name="chapter build",
+                    command=["nice", "lake", "build", "DemoBlueprint.Chapters.Clean"],
+                    returncode=1,
+                    stdout="",
+                    stderr="lake build failed",
+                ),
+            ):
+                with patch.object(sys, "argv", argv):
+                    stdout = io.StringIO()
+                    with contextlib.redirect_stdout(stdout):
+                        result = status_completion.main()
+            output = stdout.getvalue()
+            self.assertEqual(result, 0, msg=output)
+            self.assertIn("  build-failing: 1", output)
+            self.assertIn("  complete: no", output)
+            self.assertIn("[build-failing] DemoBlueprint/Chapters/Clean.lean", output)
+
+    def test_status_completion_does_not_autodiscover_all_root_modules_when_chapter_root_is_dot(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_file(
+                root / "verso-harness.toml",
+                "\n".join(
+                    [
+                        'package_name = "DemoBlueprint"',
+                        'blueprint_main = "BlueprintMain"',
+                        'formalization_path = "Demo"',
+                        'chapter_root = "."',
+                        'tex_source_glob = "./blueprint/src/chapter/main.tex"',
+                        "",
+                        "[lt]",
+                        'default_chapters = ["Chapters/Clean.lean"]',
+                        "",
+                    ]
+                )
+                + "\n",
+            )
+            write_file(
+                root / "Chapters" / "Clean.lean",
+                '#doc (Manual) "Clean" =>\n\nAlpha beta.\n```tex\nAlpha beta.\n```\n',
+            )
+            write_file(root / "Support.lean", "def helper : Nat := 0\n")
+            (root / "Demo").mkdir(parents=True, exist_ok=True)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT_DIR / "status_completion.py"),
+                    "--project-root",
+                    str(root),
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+            self.assertIn("[metadata-clean] Chapters/Clean.lean", result.stdout)
+            self.assertNotIn("Support.lean", result.stdout)
+            self.assertIn("  untracked: 0", result.stdout)
 
 
 if __name__ == "__main__":

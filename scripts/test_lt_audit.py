@@ -48,10 +48,6 @@ class LtAuditTests(unittest.TestCase):
                     "[lt]",
                     'default_chapters = ["DemoBlueprint/Chapters/Intro.lean"]',
                     "",
-                    "[harness]",
-                    "native_warnings = false",
-                    "non_port_chapters = []",
-                    "",
                 ]
             ),
         )
@@ -86,8 +82,8 @@ class LtAuditTests(unittest.TestCase):
 
     def test_chapter_build_command_uses_plain_lake_build_by_default(self) -> None:
         self.assertEqual(
-            chapter_build_command("DemoBlueprint.Chapters.Introduction"),
-            ["nice", "lake", "build", "DemoBlueprint.Chapters.Introduction"],
+            chapter_build_command("DemoBlueprint.Chapters.SourceChapter"),
+            ["nice", "lake", "build", "DemoBlueprint.Chapters.SourceChapter"],
         )
 
     def test_parse_warning_line_extracts_path_when_present(self) -> None:

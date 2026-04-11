@@ -46,7 +46,6 @@ proof = "proof"
 [harness]
 native_warnings = false
 strict_external_code = true
-non_port_chapters = []
 ```
 
 Use the actual relative TeX source locator here. Some projects use a single
@@ -58,6 +57,8 @@ to extend the default theorem/definition/lemma/corollary/proof mapping.
 Do not seed the harness with synthetic chapter prose. Add real source-backed
 chapter files under `chapter_root`, then list those files in
 `lt.default_chapters` before starting LT work.
+Do not add local-only maintenance or status chapters under `chapter_root`; if a
+file lives there as a chapter, it should correspond to upstream TeX source.
 The `[harness]` booleans are the shared warning policy surface. Keep
 `harness.strict_external_code` aligned with the generated `lakefile.lean`
 strict-resolve lean option, and use

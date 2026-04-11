@@ -118,7 +118,7 @@ class HarnessConfigTests(unittest.TestCase):
                 resolve_chapter_paths(root, [Path('Demo.lean')])
             self.assertIn('missing required verso-harness.toml', str(exc.exception))
 
-    def test_legacy_non_port_chapters_is_still_accepted(self) -> None:
+    def test_non_port_chapters_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             write_config(root)
@@ -128,8 +128,9 @@ class HarnessConfigTests(unittest.TestCase):
                 + '\n[harness]\nnon_port_chapters = ["DemoBlueprint/Chapters/Legacy.lean"]\n',
                 encoding='utf-8',
             )
-            config = load_config(root)
-            self.assertEqual(config.non_port_chapters, ('DemoBlueprint/Chapters/Legacy.lean',))
+            with self.assertRaises(SystemExit) as exc:
+                load_config(root)
+            self.assertIn('harness.non_port_chapters is no longer supported', str(exc.exception))
 
 
 if __name__ == '__main__':

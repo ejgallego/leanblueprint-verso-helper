@@ -33,13 +33,6 @@ def write_config(
         for tex_kind, verso_kind in node_kinds.items():
             lines.append(f'{tex_kind} = "{verso_kind}"')
         lines.append('')
-    lines.extend(
-        [
-            '[harness]',
-            'non_port_chapters = []',
-            '',
-        ]
-    )
     (root / 'verso-harness.toml').write_text('\n'.join(lines), encoding='utf-8')
 
 

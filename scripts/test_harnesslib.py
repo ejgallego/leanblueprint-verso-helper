@@ -17,6 +17,7 @@ from _harnesslib import (  # noqa: E402
     find_lake_lean_option_nat,
     find_verso_blueprint_dependency,
     parse_github_repo_slug,
+    read_verso_blueprint_requirement,
     verso_math_lint_option_name,
     verso_strict_external_code_option_name,
     verso_warn_line_length_option_name,
@@ -56,6 +57,18 @@ class HarnessLibTests(unittest.TestCase):
             self.assertEqual(
                 find_verso_blueprint_dependency(root),
                 ("leanprover/verso-blueprint", "main"),
+            )
+
+    def test_read_verso_blueprint_requirement_preserves_raw_url(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "lakefile.lean").write_text(
+                'require VersoBlueprint from git "../vendor/verso-blueprint"@"v4.29.0"\n',
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                read_verso_blueprint_requirement(root),
+                ("../vendor/verso-blueprint", "v4.29.0"),
             )
 
     def test_find_verso_blueprint_dependency_handles_missing_lakefile(self) -> None:

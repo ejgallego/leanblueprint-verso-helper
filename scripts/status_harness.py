@@ -6,7 +6,6 @@ import argparse
 from dataclasses import dataclass, field
 import json
 from pathlib import Path
-import re
 import subprocess
 import sys
 
@@ -18,13 +17,8 @@ if str(SCRIPT_DIR) not in sys.path:
 from _harnesslib import (  # noqa: E402
     default_verso_blueprint_ref,
     load_config,
+    read_verso_blueprint_requirement,
     resolve_project_root,
-)
-
-
-VERSO_BLUEPRINT_REQUIRE_PATTERN = re.compile(
-    r'^\s*require\s+VersoBlueprint\s+from\s+git\s+"(?P<url>[^"]+)"\s+@\s+"(?P<ref>[^"]+)"',
-    re.M,
 )
 
 
@@ -111,14 +105,7 @@ def read_text(path: Path) -> str | None:
 
 
 def read_verso_blueprint_dependency(project_root: Path) -> tuple[str | None, str | None]:
-    lakefile = project_root / "lakefile.lean"
-    if not lakefile.exists():
-        return None, None
-
-    match = VERSO_BLUEPRINT_REQUIRE_PATTERN.search(lakefile.read_text(encoding="utf-8"))
-    if match is None:
-        return None, None
-    return match.group("url"), match.group("ref")
+    return read_verso_blueprint_requirement(project_root)
 
 
 def choose_remote(repo: Path) -> str | None:

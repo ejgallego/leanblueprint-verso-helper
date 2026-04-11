@@ -117,6 +117,7 @@ def write_host_project(
     verso_url: str,
     verso_ref: str,
     verso_rev: str | None,
+    compact_at_syntax: bool = False,
 ) -> None:
     write_file(
         project_root / "verso-harness.toml",
@@ -129,14 +130,16 @@ def write_host_project(
                 'tex_source_glob = "./blueprint/src/chapter/main.tex"',
                 "",
                 "[lt]",
-                'default_chapters = ["DemoBlueprint/Chapters/Introduction.lean"]',
-                "",
-                "[harness]",
-                'non_port_chapters = ["DemoBlueprint/Chapters/PortingStatus.lean"]',
+                'default_chapters = ["DemoBlueprint/Chapters/SourceChapter.lean"]',
                 "",
             ]
         )
         + "\n",
+    )
+    verso_requirement = (
+        f'require VersoBlueprint from git "{verso_url}"@"{verso_ref}"'
+        if compact_at_syntax
+        else f'require VersoBlueprint from git "{verso_url}" @ "{verso_ref}"'
     )
     write_file(project_root / "lean-toolchain", lean_toolchain + "\n")
     write_file(
@@ -147,7 +150,7 @@ def write_host_project(
                 "open Lake DSL",
                 "",
                 f'require Demo from "./{formalization_path}"',
-                f'require VersoBlueprint from git "{verso_url}" @ "{verso_ref}"',
+                verso_requirement,
                 "",
                 "package DemoBlueprint where",
             ]
@@ -158,12 +161,8 @@ def write_host_project(
     write_file(project_root / "DemoBlueprint.lean", "import DemoBlueprint.TeXPrelude\n")
     write_file(project_root / "DemoBlueprint" / "TeXPrelude.lean", "import VersoBlueprint\n")
     write_file(
-        project_root / "DemoBlueprint" / "Chapters" / "Introduction.lean",
-        "/-- intro -/\ndef demo : Nat := 0\n",
-    )
-    write_file(
-        project_root / "DemoBlueprint" / "Chapters" / "PortingStatus.lean",
-        "/-- status -/\ndef demoStatus : Nat := 0\n",
+        project_root / "DemoBlueprint" / "Chapters" / "SourceChapter.lean",
+        "/-- source chapter -/\ndef demoChapter : Nat := 0\n",
     )
     write_file(project_root / "scripts" / "ci-pages.sh", "#!/usr/bin/env bash\n")
     write_file(project_root / ".github" / "workflows" / "blueprint.yml", "name: demo\n")
@@ -308,6 +307,55 @@ class StatusHarnessTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
             self.assertIn("summary: ok", result.stdout)
             self.assertNotIn("needs attention", result.stdout)
+
+    def test_status_harness_accepts_compact_at_syntax(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _, _, helper_checkout, _, _ = create_remote_with_checkout(
+                root,
+                "helper",
+                branch="main",
+                initial_files={"README.md": "helper\n"},
+            )
+            verso_remote, _, _, verso_rev, _ = create_remote_with_checkout(
+                root,
+                "verso",
+                branch="v4.28.0",
+                initial_files={"README.md": "verso\n"},
+            )
+            _, _, formalization_checkout, _, _ = create_remote_with_checkout(
+                root,
+                "formalization",
+                branch="main",
+                initial_files={"lean-toolchain": "leanprover/lean4:v4.28.0\n"},
+            )
+
+            project_root = root / "project"
+            write_host_project(
+                project_root,
+                formalization_path="Formalization",
+                lean_toolchain="leanprover/lean4:v4.28.0",
+                verso_url=str(verso_remote),
+                verso_ref="v4.28.0",
+                verso_rev=verso_rev,
+                compact_at_syntax=True,
+            )
+            shutil.copytree(formalization_checkout, project_root / "Formalization")
+
+            result = run(
+                [
+                    sys.executable,
+                    str(SCRIPT_DIR / "status_harness.py"),
+                    "--project-root",
+                    str(project_root),
+                    "--helper-root",
+                    str(helper_checkout),
+                    "--offline",
+                ],
+                cwd=ROOT,
+            )
+            self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+            self.assertIn("summary: ok", result.stdout)
 
 
 if __name__ == "__main__":
