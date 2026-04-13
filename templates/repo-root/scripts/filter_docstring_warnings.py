@@ -8,7 +8,9 @@ import sys
 import tomllib
 
 
-DOCSTRING_WARNING_RE = re.compile(r"^warning:\s+.+?:\d+:\d+:\s+'[^']+' is not documented\.$")
+DOCSTRING_WARNING_RE = re.compile(
+    r"^warning:\s+.+?:\d+:\d+:\s+'.*(?:''|') is not documented\.$"
+)
 DOCSTRING_HINT_LINE = (
     "Set option 'verso.docstring.allowMissing' to 'false' to disallow missing docstrings."
 )
