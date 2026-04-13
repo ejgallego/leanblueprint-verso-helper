@@ -12,6 +12,7 @@ from _harnesslib import find_verso_blueprint_dependency, parse_github_repo_slug
 
 TRACKED_FILES = [
     Path("scripts/ci-pages.sh"),
+    Path("scripts/filter_docstring_warnings.py"),
     Path(".github/workflows/blueprint.yml"),
 ]
 

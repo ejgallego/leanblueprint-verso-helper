@@ -58,6 +58,7 @@ class HarnessConfigTests(unittest.TestCase):
                 ),
             )
             self.assertFalse(config.native_warnings)
+            self.assertFalse(config.docstring_warnings)
             self.assertTrue(config.strict_external_code)
 
     def test_custom_node_kind_pairs_extend_defaults(self) -> None:
@@ -82,11 +83,13 @@ class HarnessConfigTests(unittest.TestCase):
                 config_path.read_text(encoding='utf-8')
                 + '\n[harness]\n'
                 + 'native_warnings = true\n'
+                + 'docstring_warnings = true\n'
                 + 'strict_external_code = false\n',
                 encoding='utf-8',
             )
             config = load_config(root)
             self.assertTrue(config.native_warnings)
+            self.assertTrue(config.docstring_warnings)
             self.assertFalse(config.strict_external_code)
 
     def test_single_file_tex_source_locator_is_accepted(self) -> None:

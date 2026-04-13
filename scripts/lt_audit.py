@@ -106,6 +106,10 @@ def effective_native_warnings(config_default: bool, cli_override: bool | None) -
     return config_default if cli_override is None else cli_override
 
 
+def effective_docstring_warnings(config_default: bool, cli_override: bool | None) -> bool:
+    return config_default if cli_override is None else cli_override
+
+
 def parse_warning_line(line: str) -> tuple[str | None, str] | None:
     stripped = line.strip()
     if not stripped:
@@ -227,6 +231,13 @@ def warning_owner_groups(records: list[NativeWarningRecord]) -> dict[str, list[N
     return groups
 
 
+def docstring_skip_lines(records: list[NativeWarningRecord]) -> set[str]:
+    skip = {record.line for record in records if record.owner == "docstring"}
+    if any(record.owner == "docstring" for record in records):
+        skip.add(DOCSTRING_HINT_LINE)
+    return skip
+
+
 def warning_record_is_failing(record: NativeWarningRecord, scope: str) -> bool:
     if record.owner == "docstring":
         return False
@@ -333,6 +344,19 @@ def main() -> int:
         action="store_true",
         help="Also run the section/subsection heading-structure checker on each touched chapter.",
     )
+    docstring_warning_group = parser.add_mutually_exclusive_group()
+    docstring_warning_group.add_argument(
+        "--docstring-warnings",
+        dest="docstring_warnings",
+        action="store_true",
+        help="Show missing-docstring warnings during focused chapter builds.",
+    )
+    docstring_warning_group.add_argument(
+        "--no-docstring-warnings",
+        dest="docstring_warnings",
+        action="store_false",
+        help="Suppress missing-docstring warnings during focused chapter builds.",
+    )
     native_warning_group = parser.add_mutually_exclusive_group()
     native_warning_group.add_argument(
         "--native-warnings",
@@ -359,12 +383,17 @@ def main() -> int:
         ),
     )
     parser.set_defaults(native_warnings=None)
+    parser.set_defaults(docstring_warnings=None)
     args = parser.parse_args()
 
     project_root = resolve_project_root(args.project_root)
     config = load_config(project_root)
     paths = resolve_chapter_paths(project_root, args.paths)
     native_warnings = effective_native_warnings(config.native_warnings, args.native_warnings)
+    docstring_warnings = effective_docstring_warnings(
+        config.docstring_warnings,
+        args.docstring_warnings,
+    )
 
     if not paths:
         print("no chapter files selected for LT audit", file=sys.stderr)
@@ -459,20 +488,32 @@ def main() -> int:
                         config.formalization_path,
                         build_result,
                     )
-                    if native_warnings
+                    if native_warnings or not docstring_warnings
                     else []
                 )
                 build_ok = native_warning_check_ok(
                     build_result,
-                warning_records,
-                args.native_warnings_scope,
-            )
-            skip_warning_lines = {record.line for record in warning_records} if warning_records else None
-            if warning_records and any(record.owner == "docstring" for record in warning_records):
-                skip_warning_lines = (skip_warning_lines or set()) | {DOCSTRING_HINT_LINE}
-            print_step(build_result, ok_override=build_ok, skip_lines=skip_warning_lines)
-            print_native_warning_summary(warning_records, args.native_warnings_scope)
-            overall_ok &= build_ok
+                    warning_records,
+                    args.native_warnings_scope,
+                )
+                skip_warning_lines: set[str] | None = None
+                if native_warnings and warning_records:
+                    skip_warning_lines = {record.line for record in warning_records}
+                    if not docstring_warnings:
+                        skip_warning_lines |= docstring_skip_lines(warning_records)
+                    elif any(record.owner == "docstring" for record in warning_records):
+                        skip_warning_lines.add(DOCSTRING_HINT_LINE)
+                elif not docstring_warnings and warning_records:
+                    skip_warning_lines = docstring_skip_lines(warning_records)
+                print_step(build_result, ok_override=build_ok, skip_lines=skip_warning_lines)
+                if native_warnings:
+                    summary_records = (
+                        warning_records
+                        if docstring_warnings
+                        else [record for record in warning_records if record.owner != "docstring"]
+                    )
+                    print_native_warning_summary(summary_records, args.native_warnings_scope)
+                overall_ok &= build_ok
 
     if args.pages:
         print("\n== pages")

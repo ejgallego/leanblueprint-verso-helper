@@ -5,6 +5,9 @@
   truth for package layout, LT chapter scope, and the TeX source path.
 - Keep `lakefile.lean` aligned with that warning policy, especially
   `harness.strict_external_code`.
+- Use `harness.docstring_warnings` to decide whether standard harness workflows
+  should surface missing-docstring warnings. The default is to keep them
+  hidden until the repo is ready to work through them explicitly.
 - Before porting or maintaining blueprint files, read:
   - `tools/verso-harness/references/layout.md`
   - `tools/verso-harness/references/lt-method.md`

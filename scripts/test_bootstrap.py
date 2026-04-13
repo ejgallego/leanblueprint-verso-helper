@@ -91,6 +91,7 @@ class BootstrapTests(unittest.TestCase):
             if chapter_dir.exists():
                 self.assertEqual(list(chapter_dir.glob('*.lean')), [])
             self.assertIn('native_warnings = false', config_text)
+            self.assertIn('docstring_warnings = false', config_text)
             self.assertIn('strict_external_code = true', config_text)
 
             check = subprocess.run(

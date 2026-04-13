@@ -31,6 +31,7 @@ DEFAULT_LT_NODE_KIND_PAIRS = (
     ("proof", "proof"),
 )
 DEFAULT_NATIVE_WARNINGS = False
+DEFAULT_DOCSTRING_WARNINGS = False
 DEFAULT_STRICT_EXTERNAL_CODE = True
 WEAK_VERSO_OPTION_REFS = frozenset({"v4.28.0", "v4.29.0"})
 
@@ -45,6 +46,7 @@ class HarnessConfig:
     lt_default_chapters: tuple[str, ...]
     lt_node_kind_pairs: tuple[tuple[str, str], ...]
     native_warnings: bool
+    docstring_warnings: bool
     strict_external_code: bool
 
 
@@ -298,6 +300,11 @@ def load_config(project_root: Path) -> HarnessConfig:
         if "native_warnings" in harness_section
         else DEFAULT_NATIVE_WARNINGS
     )
+    docstring_warnings = (
+        require_bool(harness_section, "docstring_warnings", "harness.docstring_warnings")
+        if "docstring_warnings" in harness_section
+        else DEFAULT_DOCSTRING_WARNINGS
+    )
     strict_external_code = (
         require_bool(harness_section, "strict_external_code", "harness.strict_external_code")
         if "strict_external_code" in harness_section
@@ -327,6 +334,7 @@ def load_config(project_root: Path) -> HarnessConfig:
         lt_default_chapters=lt_default_chapters,
         lt_node_kind_pairs=lt_node_kind_pairs,
         native_warnings=native_warnings,
+        docstring_warnings=docstring_warnings,
         strict_external_code=strict_external_code,
     )
 

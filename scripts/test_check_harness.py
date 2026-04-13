@@ -48,6 +48,7 @@ def write_harness_project(
                 "",
                 "[harness]",
                 'native_warnings = false',
+                'docstring_warnings = false',
                 f"strict_external_code = {'true' if strict_external_code else 'false'}",
                 "",
             ]
@@ -86,6 +87,7 @@ def write_harness_project(
         '#doc (Manual) "Source Chapter" =>\n\nAlpha.\n',
     )
     write_file(root / "scripts" / "ci-pages.sh", "#!/usr/bin/env bash\nexit 0\n", executable=True)
+    write_file(root / "scripts" / "filter_docstring_warnings.py", "print('')\n")
     write_file(
         root / ".github" / "workflows" / "blueprint.yml",
         "name: blueprint\non: workflow_dispatch\njobs: {}\n",

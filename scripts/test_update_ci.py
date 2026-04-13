@@ -60,6 +60,8 @@ class UpdateCiTests(unittest.TestCase):
             script_path = project_root / "scripts" / "ci-pages.sh"
             self.assertTrue(script_path.exists())
             self.assertTrue(script_path.stat().st_mode & stat.S_IXUSR)
+            filter_path = project_root / "scripts" / "filter_docstring_warnings.py"
+            self.assertTrue(filter_path.exists())
 
 
 if __name__ == "__main__":

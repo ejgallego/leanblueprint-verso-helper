@@ -20,6 +20,7 @@ from lt_audit import (  # noqa: E402
     chapter_build_command,
     classify_warning_owner,
     collect_native_warning_records,
+    effective_docstring_warnings,
     effective_native_warnings,
     is_missing_docstring_warning,
     native_warning_check_ok,
@@ -120,6 +121,12 @@ class LtAuditTests(unittest.TestCase):
         self.assertTrue(effective_native_warnings(True, None))
         self.assertTrue(effective_native_warnings(False, True))
         self.assertFalse(effective_native_warnings(True, False))
+
+    def test_docstring_warning_policy_uses_config_default_until_overridden(self) -> None:
+        self.assertFalse(effective_docstring_warnings(False, None))
+        self.assertTrue(effective_docstring_warnings(True, None))
+        self.assertTrue(effective_docstring_warnings(False, True))
+        self.assertFalse(effective_docstring_warnings(True, False))
 
     def test_classify_warning_owner_uses_project_ownership(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -388,6 +395,7 @@ class LtAuditTests(unittest.TestCase):
         self.assertIn("--native-warnings", result.stdout)
         self.assertIn("--native-warnings-scope", result.stdout)
         self.assertIn("--heading-structure", result.stdout)
+        self.assertIn("--docstring-warnings", result.stdout)
 
 
 if __name__ == "__main__":

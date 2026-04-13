@@ -39,7 +39,7 @@ After that:
 1. review `verso-harness.toml`
 2. add your first real chapter file under `chapter_root`
 3. set `lt.default_chapters`
-4. review `harness.native_warnings` and `harness.strict_external_code`
+4. review `harness.native_warnings`, `harness.docstring_warnings`, and `harness.strict_external_code`
 5. run `python3 tools/verso-harness/scripts/check_harness.py --project-root .`
 6. copy `tools/verso-harness/snippets/AGENTS.host.md` into `AGENTS.md`
 7. choose the first direct-port chapter from `lt.default_chapters`

@@ -60,6 +60,7 @@ def main() -> int:
         Path("lakefile.lean"),
         Path("lean-toolchain"),
         Path("scripts/ci-pages.sh"),
+        Path("scripts/filter_docstring_warnings.py"),
         Path(".github/workflows/blueprint.yml"),
     ]
 
