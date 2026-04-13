@@ -85,6 +85,14 @@ class LtAuditTests(unittest.TestCase):
                     stdout="heading ok",
                     stderr="",
                 )
+            if name == "source-authorized metadata check":
+                return StepResult(
+                    name=name,
+                    command=command,
+                    returncode=0,
+                    stdout="metadata ok",
+                    stderr="",
+                )
             raise AssertionError(f"unexpected step: {name}")
 
         return inner
@@ -396,6 +404,7 @@ class LtAuditTests(unittest.TestCase):
         self.assertIn("--native-warnings-scope", result.stdout)
         self.assertIn("--heading-structure", result.stdout)
         self.assertIn("--docstring-warnings", result.stdout)
+        self.assertIn("--source-metadata", result.stdout)
 
 
 if __name__ == "__main__":

@@ -344,6 +344,11 @@ def main() -> int:
         action="store_true",
         help="Also run the section/subsection heading-structure checker on each touched chapter.",
     )
+    parser.add_argument(
+        "--source-metadata",
+        action="store_true",
+        help="Also fail on local `{uses}` / `(lean := ...)` metadata that the adjacent TeX witness does not authorize.",
+    )
     docstring_warning_group = parser.add_mutually_exclusive_group()
     docstring_warning_group.add_argument(
         "--docstring-warnings",
@@ -405,6 +410,7 @@ def main() -> int:
     node_kind_script = str(SCRIPT_DIR / "check_blueprint_node_kinds.py")
     math_script = str(SCRIPT_DIR / "check_verso_math_delimiters.py")
     heading_script = str(SCRIPT_DIR / "check_blueprint_heading_structure.py")
+    source_metadata_script = str(SCRIPT_DIR / "check_source_authorized_metadata.py")
 
     for path in paths:
         print(f"\n== {path}")
@@ -465,6 +471,15 @@ def main() -> int:
             )
             print_step(heading_result)
             overall_ok &= heading_result.ok
+
+        if args.source_metadata:
+            source_metadata_result = run_step(
+                project_root,
+                "source-authorized metadata check",
+                [sys.executable, source_metadata_script, "--project-root", str(project_root), str(path)],
+            )
+            print_step(source_metadata_result)
+            overall_ok &= source_metadata_result.ok
 
         if not args.no_build:
             module = lean_file_to_module(project_root, path)
