@@ -15,6 +15,24 @@ ROOT = SCRIPT_DIR.parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+DEMO_CONFIG = (
+    'package_name = "DemoBlueprint"\n'
+    'blueprint_main = "DemoMain"\n'
+    'formalization_path = "Demo"\n'
+    'chapter_root = "DemoBlueprint/Chapters"\n'
+    'tex_source_glob = "./blueprint/src/chapter/*.tex"\n'
+    "\n"
+    "[lt]\n"
+    "default_chapters = []\n"
+    "\n"
+    "[lt.node_kinds]\n"
+    'theorem = "theorem"\n'
+    'definition = "definition"\n'
+    'lemma = "lemma_"\n'
+    'corollary = "corollary"\n'
+    'proof = "proof"\n'
+)
+
 class UpdateCiTests(unittest.TestCase):
     def test_update_ci_renders_reusable_workflow_reference(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -34,6 +52,7 @@ class UpdateCiTests(unittest.TestCase):
                 + '\n',
                 encoding='utf-8',
             )
+            (project_root / "verso-harness.toml").write_text(DEMO_CONFIG, encoding="utf-8")
             result = subprocess.run(
                 [
                     sys.executable,
@@ -61,6 +80,9 @@ class UpdateCiTests(unittest.TestCase):
             script_path = project_root / "scripts" / "ci-pages.sh"
             self.assertTrue(script_path.exists())
             self.assertTrue(script_path.stat().st_mode & stat.S_IXUSR)
+            script_text = script_path.read_text(encoding="utf-8")
+            self.assertIn("lake build +DemoMain:deps", script_text)
+            self.assertIn("lake env lean --run DemoMain.lean", script_text)
             filter_path = project_root / "scripts" / "filter_docstring_warnings.py"
             self.assertTrue(filter_path.exists())
 
@@ -83,10 +105,12 @@ class UpdateCiTests(unittest.TestCase):
                 encoding='utf-8',
             )
             (project_root / "verso-harness.toml").write_text(
-                "[harness]\n"
-                "native_warnings = false\n"
-                "docstring_warnings = false\n"
-                "strict_external_code = true\n",
+                DEMO_CONFIG
+                + "\n"
+                + "[harness]\n"
+                + "native_warnings = false\n"
+                + "docstring_warnings = false\n"
+                + "strict_external_code = true\n",
                 encoding="utf-8",
             )
             update_result = subprocess.run(

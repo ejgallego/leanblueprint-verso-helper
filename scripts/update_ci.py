@@ -7,7 +7,7 @@ import stat
 import sys
 from pathlib import Path
 
-from _harnesslib import find_verso_blueprint_dependency, parse_github_repo_slug
+from _harnesslib import find_verso_blueprint_dependency, load_config, parse_github_repo_slug
 
 
 TRACKED_FILES = [
@@ -68,6 +68,7 @@ def main() -> int:
     args = parse_args()
     template_root = Path(__file__).resolve().parents[1] / "templates" / "repo-root"
     project_root = args.project_root.resolve()
+    config = load_config(project_root)
     blueprint_repo, blueprint_ref = find_verso_blueprint_dependency(project_root)
     pages_workflow_repo = args.pages_workflow_repo or blueprint_repo or default_pages_workflow_repo()
     pages_workflow_ref = args.pages_workflow_ref or blueprint_ref
@@ -79,6 +80,7 @@ def main() -> int:
     replacements = {
         "__PAGES_WORKFLOW_REPO__": pages_workflow_repo,
         "__PAGES_WORKFLOW_REF__": pages_workflow_ref,
+        "__BLUEPRINT_MAIN__": config.blueprint_main,
     }
 
     changed = 0

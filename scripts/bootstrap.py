@@ -170,6 +170,7 @@ def main() -> int:
         "__STRICT_EXTERNAL_CODE__": "true",
         "__PAGES_WORKFLOW_REPO__": pages_workflow_repo,
         "__PAGES_WORKFLOW_REF__": pages_workflow_ref,
+        "__BLUEPRINT_MAIN__": "BlueprintMain",
     }
 
     written: list[Path] = []
