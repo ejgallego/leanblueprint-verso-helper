@@ -103,7 +103,9 @@ The upstream formalization determines the Lean toolchain. In a consumer repo:
 
 - first update the upstream formalization to the desired revision
 - then copy or confirm the same value in the root `lean-toolchain`
-- then update the `VersoBlueprint` ref in `lakefile.lean` to the matching branch `v<release>`
+- then update the `VersoBlueprint` ref in `lakefile.lean` to the matching base
+  release branch `v<major>.<minor>.<patch>`; prerelease Lean toolchains such as
+  `v4.30.0-rc2` still use `VersoBlueprint` branch `v4.30.0`
 - then refresh caches or rebuild as needed
 - then repair any import or syntax fallout in the blueprint modules
 

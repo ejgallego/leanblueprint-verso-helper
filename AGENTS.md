@@ -82,8 +82,9 @@ a host Lean project that is porting a `leanblueprint` or TeX blueprint source to
 - Keep shared macros in one `TeXPrelude` module.
 - The upstream formalization determines the Lean toolchain. Keep the root
   `lean-toolchain` equal to the upstream value, and choose the matching
-  `VersoBlueprint` branch `v<release>` unless explicit compatibility work
-  says otherwise.
+  `VersoBlueprint` base release branch `v<major>.<minor>.<patch>`. For Lean
+  prereleases such as `v4.30.0-rc2`, use `VersoBlueprint` branch `v4.30.0`
+  unless explicit compatibility work says otherwise.
 - Validate edited blueprint modules incrementally.
 - After a coherent batch, run `bash ./scripts/ci-pages.sh`.
 - Keep the root build green. If a faithful Lean link would pull in imports that

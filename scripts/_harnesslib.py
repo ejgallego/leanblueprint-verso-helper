@@ -80,10 +80,11 @@ def extract_lean_release(lean_toolchain: str) -> str:
 
 def default_verso_blueprint_ref(lean_toolchain: str) -> str:
     release = extract_lean_release(lean_toolchain)
+    release_match = re.fullmatch(r"v?(?P<base>\d+\.\d+\.\d+)(?:[-+].*)?", release)
+    if release_match is not None:
+        return f"v{release_match.group('base')}"
     if release.startswith("v"):
         return release
-    if re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.]+)?", release):
-        return f"v{release}"
     return release
 
 

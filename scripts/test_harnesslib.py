@@ -81,6 +81,14 @@ class HarnessLibTests(unittest.TestCase):
             "v4.28.0",
         )
         self.assertEqual(
+            default_verso_blueprint_ref("leanprover/lean4:v4.30.0-rc2"),
+            "v4.30.0",
+        )
+        self.assertEqual(
+            default_verso_blueprint_ref("leanprover/lean4:4.30.0-rc2"),
+            "v4.30.0",
+        )
+        self.assertEqual(
             default_verso_blueprint_ref("leanprover/lean4:nightly-2026-04-10"),
             "nightly-2026-04-10",
         )

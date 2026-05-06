@@ -308,6 +308,55 @@ class StatusHarnessTests(unittest.TestCase):
             self.assertIn("summary: ok", result.stdout)
             self.assertNotIn("needs attention", result.stdout)
 
+    def test_status_harness_accepts_base_verso_branch_for_lean_prerelease(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _, _, helper_checkout, _, _ = create_remote_with_checkout(
+                root,
+                "helper",
+                branch="main",
+                initial_files={"README.md": "helper\n"},
+            )
+            verso_remote, _, _, verso_rev, _ = create_remote_with_checkout(
+                root,
+                "verso",
+                branch="v4.30.0",
+                initial_files={"README.md": "verso\n"},
+            )
+            _, _, formalization_checkout, _, _ = create_remote_with_checkout(
+                root,
+                "formalization",
+                branch="main",
+                initial_files={"lean-toolchain": "leanprover/lean4:v4.30.0-rc2\n"},
+            )
+
+            project_root = root / "project"
+            write_host_project(
+                project_root,
+                formalization_path="Formalization",
+                lean_toolchain="leanprover/lean4:v4.30.0-rc2",
+                verso_url=str(verso_remote),
+                verso_ref="v4.30.0",
+                verso_rev=verso_rev,
+            )
+            shutil.copytree(formalization_checkout, project_root / "Formalization")
+
+            result = run(
+                [
+                    sys.executable,
+                    str(SCRIPT_DIR / "status_harness.py"),
+                    "--project-root",
+                    str(project_root),
+                    "--helper-root",
+                    str(helper_checkout),
+                    "--offline",
+                ],
+                cwd=ROOT,
+            )
+            self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+            self.assertIn("expected_verso_ref: v4.30.0", result.stdout)
+            self.assertIn("summary: ok", result.stdout)
+
     def test_status_harness_accepts_compact_at_syntax(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
