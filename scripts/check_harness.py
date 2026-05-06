@@ -27,6 +27,8 @@ from _harnesslib import (  # noqa: E402
 
 
 PLACEHOLDER_PATTERN = re.compile(r"__[A-Z0-9_]+__")
+CI_DEPS_TARGET_PATTERN = re.compile(r"\blake\s+build\s+[^\n|;&]*:deps\b")
+CI_EXE_TARGET_PATTERN = re.compile(r"\blake\s+build\s+blueprint-gen\b")
 
 
 def parse_args() -> argparse.Namespace:
@@ -150,6 +152,18 @@ def main() -> int:
     script_executable = (
         script_path.exists() and bool(script_path.stat().st_mode & stat.S_IXUSR)
     )
+    if script_path.exists():
+        script_text = script_path.read_text(encoding="utf-8")
+        if CI_DEPS_TARGET_PATTERN.search(script_text):
+            mismatches.append(
+                "scripts/ci-pages.sh must not build a module `:deps` target; "
+                "that target can force Lake to rebuild external dependency packages"
+            )
+        if CI_EXE_TARGET_PATTERN.search(script_text):
+            mismatches.append(
+                "scripts/ci-pages.sh must not build the `blueprint-gen` executable; "
+                "that target can force Lake to build native artifacts for external dependencies"
+            )
 
     if missing or mismatches or placeholder_paths or not script_executable:
         if missing:

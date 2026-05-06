@@ -35,10 +35,10 @@ Escalate from Beam to a normal build when:
 - Beam looks stale or unhealthy
 - the error seems to come from the package graph rather than one module
 
-Focused build:
+Focused blueprint-main module build:
 
 ```bash
-nice lake build blueprint-gen
+nice lake build +Main
 ```
 
 LT audit stack for one or more touched chapters:

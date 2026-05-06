@@ -33,7 +33,9 @@ DEFAULT_LT_NODE_KIND_PAIRS = (
 DEFAULT_NATIVE_WARNINGS = False
 DEFAULT_DOCSTRING_WARNINGS = False
 DEFAULT_STRICT_EXTERNAL_CODE = True
-WEAK_VERSO_OPTION_REFS = frozenset({"v4.28.0", "v4.29.0"})
+WEAK_VERSO_OPTION_REFS = frozenset(
+    {"v4.28.0", "v4.29.0", "v4.30.0", "v4.30.0-rc2"}
+)
 
 
 @dataclass(frozen=True)

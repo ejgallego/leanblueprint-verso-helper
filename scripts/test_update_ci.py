@@ -81,7 +81,9 @@ class UpdateCiTests(unittest.TestCase):
             self.assertTrue(script_path.exists())
             self.assertTrue(script_path.stat().st_mode & stat.S_IXUSR)
             script_text = script_path.read_text(encoding="utf-8")
-            self.assertIn("lake build +DemoMain:deps", script_text)
+            self.assertIn("lake build +DemoMain", script_text)
+            self.assertNotIn(":deps", script_text)
+            self.assertNotIn("lake build blueprint-gen", script_text)
             self.assertIn("lake env lean --run DemoMain.lean", script_text)
             filter_path = project_root / "scripts" / "filter_docstring_warnings.py"
             self.assertTrue(filter_path.exists())
