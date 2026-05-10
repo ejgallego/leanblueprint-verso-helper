@@ -162,7 +162,8 @@ Host-owned and review-driven:
 - `lean-toolchain`
 - `BlueprintMain.lean` or the configured `blueprint_main`
 - root blueprint modules and chapter prose
-- declaration attachments and dependency metadata
+- declaration attachments, dependency metadata, and source-backed
+  `{bpref "..."}[]` link-only blueprint references
 
 The generated `blueprint.yml` is a thin caller into the upstream
 `verso-blueprint` reusable Pages workflow. Refresh it after bumping the helper

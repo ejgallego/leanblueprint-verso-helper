@@ -45,7 +45,9 @@ def write_config(root: Path, default_chapters: list[str]) -> None:
 
 class CheckLtSimilarityTests(unittest.TestCase):
     def test_metadata_and_markup_are_ignored(self) -> None:
-        verso = verso_block('Alpha {uses "foo"}[] [Beta](https://example.com) and $`Gamma`$.')
+        verso = verso_block(
+            'Alpha {uses "foo"}[] {bpref "bar"}[] [Beta](https://example.com) and $`Gamma`$.'
+        )
         tex = tex_block(
             r"""
 \label{foo}
@@ -107,6 +109,38 @@ Alpha.
         self.assertEqual(score.tex_refs, {"bar", "baz"})
         self.assertEqual(score.strong_ref_candidates, set())
         self.assertEqual(score.soft_ref_hints, {"bar", "baz"})
+
+    def test_bprefs_discharge_source_ref_hints_without_uses_edge(self) -> None:
+        verso = verso_block('By theorem {bpref "bar"}[]. Alpha.')
+        tex = tex_block(
+            r"""
+\begin{proof}
+By theorem~\ref{bar}.
+Alpha.
+\end{proof}
+""".strip()
+        )
+        score = score_pair(verso, tex)
+        self.assertEqual(score.tex_refs, {"bar"})
+        self.assertEqual(score.verso_bprefs, {"bar"})
+        self.assertEqual(score.extra_uses, set())
+        self.assertEqual(score.extra_bprefs, set())
+        self.assertEqual(score.ref_hint_count, 0)
+        self.assertGreaterEqual(score.token_ratio, 0.99)
+
+    def test_local_only_bprefs_are_metadata_drift(self) -> None:
+        verso = verso_block('Alpha {bpref "bar"}[].')
+        tex = tex_block(
+            r"""
+\begin{proof}
+Alpha.
+\end{proof}
+""".strip()
+        )
+        score = score_pair(verso, tex)
+        self.assertEqual(score.verso_bprefs, {"bar"})
+        self.assertEqual(score.extra_bprefs, {"bar"})
+        self.assertEqual(score.pure_metadata_diff_count, 1)
 
     def test_env_refs_with_uses_are_strong_candidates(self) -> None:
         verso = verso_block('Alpha {uses "foo"}[].')
@@ -367,6 +401,44 @@ By theorem~\\ref{bar}.
             self.assertIn("drift=0", result.stdout)
             self.assertIn("ref_review=1", result.stdout)
             self.assertIn("- ref-review:", result.stdout)
+            self.assertNotIn("- metadata-focus:", result.stdout)
+
+    def test_cli_bprefs_clear_ref_review(self) -> None:
+        content = """#doc (Manual) "Demo" =>
+
+:::proof "demo"
+By theorem {bpref "bar"}[].
+:::
+```tex "demo/proof"
+\\begin{proof}
+By theorem~\\ref{bar}.
+\\end{proof}
+```
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_config(root, ["Demo.lean"])
+            path = root / "Demo.lean"
+            path.write_text(content, encoding="utf-8")
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT_DIR / "check_lt_similarity.py"),
+                    "--project-root",
+                    tmp,
+                    str(path),
+                    "--top",
+                    "3",
+                ],
+                cwd=SCRIPT_DIR.parent,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+            self.assertIn("drift=0", result.stdout)
+            self.assertIn("ref_review=0", result.stdout)
+            self.assertNotIn("- ref-review:", result.stdout)
             self.assertNotIn("- metadata-focus:", result.stdout)
 
     def test_cli_surfaces_placeholder_lean_priority(self) -> None:

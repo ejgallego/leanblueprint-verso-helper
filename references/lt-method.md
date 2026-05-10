@@ -26,6 +26,9 @@ Faithfulness`) are accepted aliases for the same workflow.
 - Do not use `:::theorem` as a generic wrapper for theorem-like source blocks.
 - Preserve TeX `\uses{...}` edges when they carry real dependency meaning, but
   do not invent new dependency edges just to improve graph shape.
+- Translate TeX `\ref{...}` references to blueprint nodes as `{bpref "..."}[]`
+  when the prose is only pointing at the node and should not add a dependency
+  edge.
 - When a standalone line would otherwise consist only of consecutive
   `{uses "..."}[]` references, rewrite it deterministically as a sentence that
   starts with `Uses`.
@@ -37,7 +40,7 @@ Faithfulness`) are accepted aliases for the same workflow.
   applies equally to statements and proofs.
 - Treat metadata cleanup as a second phase of LT rather than as a substitute
   for LT. First pair the text with a source witness, then tighten
-  `(lean := "...")` and `{uses "..."}[]`.
+  `(lean := "...")`, `{uses "..."}[]`, and `{bpref "..."}[]`.
 - When non-literal material is unavoidable, keep it visibly separate and label
   it as an editorial or harness note.
 

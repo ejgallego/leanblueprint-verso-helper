@@ -30,6 +30,7 @@ MATH_QUOTIENT_RE = re.compile(r"\b[A-Z][A-Za-z0-9]*\s*/\s*[A-Z][A-Za-z0-9]*\b")
 LEAN_NAME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_']*(?:\.[A-Za-z0-9_']+)+$")
 NON_MATH_TEX_COMMANDS = {
     "begin",
+    "bpref",
     "chapter",
     "cite",
     "citep",

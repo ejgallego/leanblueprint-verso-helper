@@ -347,7 +347,10 @@ def main() -> int:
     parser.add_argument(
         "--source-metadata",
         action="store_true",
-        help="Also fail on local `{uses}` / `(lean := ...)` metadata that the adjacent TeX witness does not authorize.",
+        help=(
+            "Also fail on local `{uses}`, `{bpref}`, or `(lean := ...)` metadata "
+            "that the adjacent TeX witness does not authorize."
+        ),
     )
     docstring_warning_group = parser.add_mutually_exclusive_group()
     docstring_warning_group.add_argument(

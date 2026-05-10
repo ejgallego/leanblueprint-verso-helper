@@ -17,8 +17,8 @@ from check_lt_similarity import paired_blocks, score_pair  # noqa: E402
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Fail when local Verso `{uses ...}` or `(lean := ...)` metadata is not "
-            "authorized by the adjacent TeX witness."
+            "Fail when local Verso `{uses ...}`, `{bpref ...}`, or `(lean := ...)` "
+            "metadata is not authorized by the adjacent TeX witness."
         )
     )
     parser.add_argument(
@@ -48,13 +48,15 @@ def main() -> int:
             continue
         for block, tex in pairs:
             score = score_pair(block, tex)
-            if not score.extra_uses and not score.extra_lean:
+            if not score.extra_uses and not score.extra_lean and not score.extra_bprefs:
                 continue
             found = True
             kind = "prose" if block.kind == "prose" else "node"
             extras: list[str] = []
             if score.extra_uses:
                 extras.append(f"extra uses {sorted(score.extra_uses)!r}")
+            if score.extra_bprefs:
+                extras.append(f"extra bprefs {sorted(score.extra_bprefs)!r}")
             if score.extra_lean:
                 extras.append(f"extra lean {sorted(score.extra_lean)!r}")
             print(

@@ -67,6 +67,27 @@ Alpha.
             self.assertEqual(result.returncode, 1, msg=result.stdout + result.stderr)
             self.assertIn("extra uses ['bar']", result.stdout)
 
+    def test_cli_reports_local_only_bpref(self) -> None:
+        content = """#doc (Manual) "Demo" =>
+
+:::proof "foo"
+{bpref "bar"}[]
+Alpha.
+:::
+```tex "foo" (slot := proof)
+\\begin{proof}
+Alpha.
+\\end{proof}
+```
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_config(root, ['Demo.lean'])
+            (root / 'Demo.lean').write_text(content, encoding='utf-8')
+            result = run_checker(root)
+            self.assertEqual(result.returncode, 1, msg=result.stdout + result.stderr)
+            self.assertIn("extra bprefs ['bar']", result.stdout)
+
     def test_cli_reports_local_only_lean_attachment(self) -> None:
         content = """#doc (Manual) "Demo" =>
 
@@ -93,6 +114,7 @@ Alpha.
 
 :::theorem "foo" (lean := "Demo.foo")
 {uses "bar"}[]
+{bpref "baz"}[]
 Alpha.
 :::
 ```tex "foo"
@@ -100,6 +122,7 @@ Alpha.
 \\label{foo}
 \\lean{Demo.foo}
 \\uses{bar}
+By theorem~\\ref{baz}.
 Alpha.
 \\end{theorem}
 ```

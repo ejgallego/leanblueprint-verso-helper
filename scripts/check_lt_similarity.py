@@ -36,6 +36,7 @@ class PairScore:
     verso_text: str
     tex_text: str
     verso_uses: set[str]
+    verso_bprefs: set[str]
     tex_uses: set[str]
     verso_lean: set[str]
     tex_lean: set[str]
@@ -59,6 +60,10 @@ class PairScore:
         return self.verso_uses - self.tex_uses
 
     @property
+    def extra_bprefs(self) -> set[str]:
+        return self.verso_bprefs - self.tex_refs
+
+    @property
     def missing_lean(self) -> set[str]:
         return self.tex_lean - self.verso_lean
 
@@ -76,13 +81,14 @@ class PairScore:
 
     @property
     def unresolved_ref_hints(self) -> set[str]:
-        return self.tex_refs - self.tex_uses - self.tex_lean - self.verso_uses
+        return self.tex_refs - self.tex_uses - self.tex_lean - self.verso_uses - self.verso_bprefs
 
     @property
     def pure_metadata_diff_count(self) -> int:
         return (
             len(self.missing_uses)
             + len(self.extra_uses)
+            + len(self.extra_bprefs)
             + len(self.missing_lean)
             + len(self.extra_lean)
         )
@@ -155,6 +161,8 @@ class PairScore:
 MARKDOWN_LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]+\)")
 USES_RE = re.compile(r'\{uses "[^"]+"\}\[\]')
 USES_CAPTURE_RE = re.compile(r'\{uses "([^"]+)"\}\[\]')
+BPREF_RE = re.compile(r'\{bpref "[^"]+"\}\[\]')
+BPREF_CAPTURE_RE = re.compile(r'\{bpref "([^"]+)"\}\[\]')
 USES_LINE_RE = re.compile(
     r'(?m)^[ \t]*Uses (?:'
     r'\{uses "[^"]+"\}\[\]'
@@ -219,6 +227,7 @@ def normalize_verso(text: str) -> str:
     text = USES_LINE_RE.sub(" ", text)
     text = MARKDOWN_LINK_RE.sub(r" \1 ", text)
     text = USES_RE.sub(" ", text)
+    text = BPREF_RE.sub(" ", text)
     text = CITE_RE.sub(" ", text)
     text = INLINE_TAG_RE.sub(" ", text)
     return normalize_common(text)
@@ -293,6 +302,10 @@ def strip_tex_comments(text: str) -> str:
 
 def extract_verso_uses(text: str) -> set[str]:
     return {match.group(1).strip() for match in USES_CAPTURE_RE.finditer(text)}
+
+
+def extract_verso_bprefs(text: str) -> set[str]:
+    return {match.group(1).strip() for match in BPREF_CAPTURE_RE.finditer(text)}
 
 
 def extract_verso_lean(header: str) -> set[str]:
@@ -373,6 +386,7 @@ def score_pair(block: Block, tex: Block) -> PairScore:
         verso_text=verso_text,
         tex_text=tex_text,
         verso_uses=extract_verso_uses(verso_body),
+        verso_bprefs=extract_verso_bprefs(verso_body),
         tex_uses=extract_tex_uses(tex_body),
         verso_lean=extract_verso_lean(block.header),
         tex_lean=extract_tex_lean(tex_body),
@@ -449,6 +463,8 @@ def summarize_file(
                     f"reground={len(score.label_regrounding_candidates)} "
                     f"witness={len(score.witness_mismatch_hints)} "
                     f"missing_uses={len(score.missing_uses)} "
+                    f"extra_uses={len(score.extra_uses)} "
+                    f"extra_bprefs={len(score.extra_bprefs)} "
                     f"missing_lean={len(score.missing_lean)} "
                     f"text={score.block.preview()}"
                 )
@@ -472,6 +488,8 @@ def summarize_file(
             metadata_bits.append(f"missing_uses={sorted(score.missing_uses)}")
         if score.extra_uses:
             metadata_bits.append(f"extra_uses={sorted(score.extra_uses)}")
+        if score.extra_bprefs:
+            metadata_bits.append(f"extra_bprefs={sorted(score.extra_bprefs)}")
         if score.missing_lean:
             metadata_bits.append(f"missing_lean={sorted(score.missing_lean)}")
         if score.extra_lean:
@@ -506,6 +524,8 @@ def summarize_file(
                 metadata_bits.append(f"missing_uses={sorted(score.missing_uses)}")
             if score.extra_uses:
                 metadata_bits.append(f"extra_uses={sorted(score.extra_uses)}")
+            if score.extra_bprefs:
+                metadata_bits.append(f"extra_bprefs={sorted(score.extra_bprefs)}")
             if score.missing_lean:
                 metadata_bits.append(f"missing_lean={sorted(score.missing_lean)}")
             if score.extra_lean:

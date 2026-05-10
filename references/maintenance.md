@@ -89,6 +89,9 @@ version-appropriate warn-line-length setting.
 - Extend the root blueprint module imports and `{include ...}` entries.
 - Add shared macros only in `TeXPrelude.lean`.
 - Prefer linking existing declarations to re-stating them.
+- Preserve source-backed reference metadata: TeX `\uses{...}` becomes
+  `{uses "..."}[]`, while link-only TeX `\ref{...}` references to blueprint
+  nodes become `{bpref "..."}[]`.
 - Validate edited modules incrementally before building the whole site.
 - For direct-port chapters, use the LT audit stack after each coherent batch:
   - `check_lt_source_pairs.py`

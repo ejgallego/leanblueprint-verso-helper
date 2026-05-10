@@ -137,7 +137,7 @@ def test_blueprint_tex_marker_code_span_is_ignored() -> None:
             r"""
             #doc (Manual) "X" =>
 
-            This documents `\leanok` and `\uses{foo}` as source syntax.
+            This documents `\leanok`, `\uses{foo}`, and `\bpref{bar}` as source syntax.
             """,
         )
         assert suspicious_math_syntax(path) == []

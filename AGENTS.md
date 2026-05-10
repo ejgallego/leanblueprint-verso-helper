@@ -55,6 +55,10 @@ a host Lean project that is porting a `leanblueprint` or TeX blueprint source to
 - Preserve TeX `\uses{...}` edges as Verso `{uses "..."}[]` references inside
   the relevant theorem, definition, or proof nodes rather than leaving them in
   free prose.
+- Translate TeX `\ref{...}` references to blueprint nodes as `{bpref "..."}[]`
+  when the source is only pointing at the node and should not add a dependency
+  edge. Do not upgrade these to `{uses "..."}[]` unless the source has
+  `\uses{...}` or the host project explicitly wants a graph dependency.
 - When a standalone line would otherwise consist only of consecutive
   `{uses "..."}[]` references, rewrite it deterministically as a sentence that
   starts with `Uses`.
@@ -76,7 +80,7 @@ a host Lean project that is porting a `leanblueprint` or TeX blueprint source to
   `tex` block over rewriting it into placeholder prose.
 - Treat metadata cleanup as a second phase of LT rather than as a substitute
   for LT. First localize the text with a `tex` witness, then tighten
-  `(lean := "...")` and `{uses "..."}[]`.
+  `(lean := "...")`, `{uses "..."}[]`, and `{bpref "..."}[]`.
 - If a chapter is only partially ported, continue with the next coherent
   section block instead of scattering edits across unrelated files.
 - Keep shared macros in one `TeXPrelude` module.
