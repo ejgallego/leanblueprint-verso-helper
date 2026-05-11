@@ -119,5 +119,6 @@ a host Lean project that is porting a `leanblueprint` or TeX blueprint source to
   - `python3 scripts/test_check_blueprint_node_kinds.py`
   - `python3 scripts/test_check_lt_similarity.py`
   - `python3 scripts/test_check_source_label_grounding.py`
+  - `python3 scripts/test_status_lt.py`
 - After changing templates, run `python3 scripts/test_bootstrap.py`.
 - When changing the canonical startup flow, run `python3 scripts/test_start_new_port.py`.
