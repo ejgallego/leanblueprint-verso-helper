@@ -135,6 +135,27 @@ Alpha.
             self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
             self.assertEqual(result.stdout.strip(), '')
 
+    def test_cli_accepts_bprefs_authorized_by_cleveref(self) -> None:
+        content = """#doc (Manual) "Demo" =>
+
+:::theorem "foo"
+See {bpref "bar"}[] and {bpref "baz"}[].
+:::
+```tex "foo"
+\\begin{theorem}
+\\label{foo}
+See Theorems~\\Cref{bar,baz}.
+\\end{theorem}
+```
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_config(root, ['Demo.lean'])
+            (root / 'Demo.lean').write_text(content, encoding='utf-8')
+            result = run_checker(root)
+            self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+            self.assertEqual(result.stdout.strip(), '')
+
     def test_cli_allows_missing_local_metadata(self) -> None:
         content = """#doc (Manual) "Demo" =>
 

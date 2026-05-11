@@ -176,7 +176,7 @@ CITE_RE = re.compile(r"\{[^{}]*cite[^{}]*\}\[\]")
 INLINE_TAG_RE = re.compile(r"\{[^{}]+\}\[\]")
 TEX_COMMENT_RE = re.compile(r"(?<!\\)%.*$")
 TEX_META_RE = re.compile(r"\\(label|lean|uses|discussion|proves)\{[^{}]*\}")
-TEX_REF_RE = re.compile(r"\\ref\{[^{}]*\}")
+TEX_REF_RE = re.compile(r"\\(?:[Cc]?ref)\{[^{}]*\}")
 TEX_FLAGS_RE = re.compile(r"\\(leanok|mathlibok|notready)\b")
 TEX_BEGIN_END_RE = re.compile(r"\\(begin|end)\{[^{}]*\}(?:\[[^\]]*\])?")
 TEX_ITEM_RE = re.compile(r"\\item\b")
@@ -186,7 +186,7 @@ TEX_SIMPLE_CMD_ARG_RE = re.compile(r"\\[A-Za-z]+\*?(?:\[[^\]]*\])?\{([^{}]*)\}")
 TEX_SIMPLE_CMD_RE = re.compile(r"\\([A-Za-z]+)")
 TEX_USES_CAPTURE_RE = re.compile(r"\\uses\{([^{}]*)\}")
 TEX_LEAN_CAPTURE_RE = re.compile(r"\\lean\{([^{}]*)\}")
-TEX_REF_CAPTURE_RE = re.compile(r"\\ref\{([^{}]*)\}")
+TEX_REF_CAPTURE_RE = re.compile(r"\\(?:[Cc]?ref)\{([^{}]*)\}")
 TEX_LABEL_CAPTURE_RE = re.compile(r"\\label\{([^{}]*)\}")
 TEX_ENV_CAPTURE_RE = re.compile(r"\\begin\{(theorem|lemma|corollary|definition|proof|remark)\}")
 VERSO_LEAN_CAPTURE_RE = re.compile(r'lean := "([^"]+)"')
@@ -333,7 +333,10 @@ def extract_tex_lean(text: str) -> set[str]:
 
 def extract_tex_refs(text: str) -> set[str]:
     stripped = strip_tex_comments(text)
-    return {match.group(1).strip() for match in TEX_REF_CAPTURE_RE.finditer(stripped)}
+    items: set[str] = set()
+    for match in TEX_REF_CAPTURE_RE.finditer(stripped):
+        items |= split_csv_items(match.group(1))
+    return items
 
 
 def extract_tex_labels(text: str) -> set[str]:

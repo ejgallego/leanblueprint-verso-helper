@@ -110,6 +110,18 @@ Alpha.
         self.assertEqual(score.strong_ref_candidates, set())
         self.assertEqual(score.soft_ref_hints, {"bar", "baz"})
 
+    def test_cleveref_refs_are_reported_as_hints(self) -> None:
+        verso = verso_block("Alpha.")
+        tex = tex_block(
+            r"""
+Alpha \Cref{bar,baz} \cref{quux}.
+""".strip()
+        )
+        score = score_pair(verso, tex)
+        self.assertEqual(score.tex_refs, {"bar", "baz", "quux"})
+        self.assertEqual(score.soft_ref_hints, {"bar", "baz", "quux"})
+        self.assertGreaterEqual(score.token_ratio, 0.99)
+
     def test_bprefs_discharge_source_ref_hints_without_uses_edge(self) -> None:
         verso = verso_block('By theorem {bpref "bar"}[]. Alpha.')
         tex = tex_block(
