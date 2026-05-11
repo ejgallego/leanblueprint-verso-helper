@@ -3,6 +3,7 @@
 set -euo pipefail
 
 python3 tools/verso-harness/scripts/ensure_dependency_cache.py --project-root . --warm-cache
+lake build VersoManual 2>&1 | python3 scripts/filter_docstring_warnings.py --project-root .
 lake build +__BLUEPRINT_MAIN__ 2>&1 | python3 scripts/filter_docstring_warnings.py --project-root .
 lake env lean --run __BLUEPRINT_MAIN__.lean --output _out/site 2>&1 | python3 scripts/filter_docstring_warnings.py --project-root .
 
