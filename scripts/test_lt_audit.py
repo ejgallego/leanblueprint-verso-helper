@@ -59,6 +59,8 @@ class LtAuditTests(unittest.TestCase):
 
     def fake_run_step(self, build_stderr: str):
         def inner(project_root: Path, name: str, command: list[str]) -> StepResult:
+            if name == "dependency cache guard":
+                return StepResult(name=name, command=command, returncode=0, stdout="cache ok", stderr="")
             if name == "LT source-pair audit":
                 return StepResult(name=name, command=command, returncode=0, stdout="pair ok", stderr="")
             if name == "LT similarity report":
@@ -299,6 +301,34 @@ class LtAuditTests(unittest.TestCase):
             self.assertIn("native warning summary: 1 total, 0 failing under consumer scope", output)
             self.assertIn("upstream-transitive: 1 (reported only)", output)
             self.assertIn("Overall: OK", output)
+
+    def test_main_stops_before_build_when_dependency_cache_guard_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            chapter_path = self.make_project(root)
+            steps: list[str] = []
+
+            def fake_guard_failure(project_root: Path, name: str, command: list[str]) -> StepResult:
+                steps.append(name)
+                if name == "dependency cache guard":
+                    return StepResult(name=name, command=command, returncode=1, stdout="", stderr="cache missing")
+                raise AssertionError(f"unexpected step after guard failure: {name}")
+
+            argv = [
+                "lt_audit.py",
+                "--project-root",
+                str(root),
+                str(chapter_path),
+            ]
+            with patch("lt_audit.run_step", side_effect=fake_guard_failure):
+                with patch.object(sys, "argv", argv):
+                    stdout = io.StringIO()
+                    with contextlib.redirect_stdout(stdout):
+                        result = lt_audit.main()
+            output = stdout.getvalue()
+            self.assertEqual(result, 1, msg=output)
+            self.assertEqual(steps, ["dependency cache guard"])
+            self.assertIn("Overall: FAIL", output)
 
     def test_main_treats_warning_prefixed_formalization_paths_as_upstream(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

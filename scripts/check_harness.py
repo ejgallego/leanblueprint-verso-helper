@@ -29,6 +29,8 @@ from _harnesslib import (  # noqa: E402
 PLACEHOLDER_PATTERN = re.compile(r"__[A-Z0-9_]+__")
 CI_DEPS_TARGET_PATTERN = re.compile(r"\blake\s+build\s+[^\n|;&]*:deps\b")
 CI_EXE_TARGET_PATTERN = re.compile(r"\blake\s+build\s+blueprint-gen\b")
+CI_LAKE_BUILD_PATTERN = re.compile(r"\blake\s+build\b")
+CI_CACHE_GUARD_PATTERN = re.compile(r"\bensure_dependency_cache\.py\b")
 
 
 def parse_args() -> argparse.Namespace:
@@ -154,6 +156,13 @@ def main() -> int:
     )
     if script_path.exists():
         script_text = script_path.read_text(encoding="utf-8")
+        build_match = CI_LAKE_BUILD_PATTERN.search(script_text)
+        guard_match = CI_CACHE_GUARD_PATTERN.search(script_text)
+        if build_match and (guard_match is None or guard_match.start() > build_match.start()):
+            mismatches.append(
+                "scripts/ci-pages.sh must run the dependency cache guard before `lake build`; "
+                "run update_ci.py to refresh helper-owned CI files"
+            )
         if CI_DEPS_TARGET_PATTERN.search(script_text):
             mismatches.append(
                 "scripts/ci-pages.sh must not build a module `:deps` target; "

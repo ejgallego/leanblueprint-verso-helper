@@ -86,7 +86,18 @@ def write_harness_project(
         root / "DemoBlueprint" / "Chapters" / "SourceChapter.lean",
         '#doc (Manual) "Source Chapter" =>\n\nAlpha.\n',
     )
-    write_file(root / "scripts" / "ci-pages.sh", "#!/usr/bin/env bash\nexit 0\n", executable=True)
+    write_file(
+        root / "scripts" / "ci-pages.sh",
+        "\n".join(
+            [
+                "#!/usr/bin/env bash",
+                "python3 tools/verso-harness/scripts/ensure_dependency_cache.py --project-root . --warm-cache",
+                "exit 0",
+            ]
+        )
+        + "\n",
+        executable=True,
+    )
     write_file(root / "scripts" / "filter_docstring_warnings.py", "print('')\n")
     write_file(
         root / ".github" / "workflows" / "blueprint.yml",
@@ -187,6 +198,28 @@ class CheckHarnessTests(unittest.TestCase):
             result = run_check(root)
             self.assertEqual(result.returncode, 1, msg=result.stdout + result.stderr)
             self.assertIn("module `:deps` target", result.stdout)
+
+    def test_check_harness_rejects_missing_dependency_cache_guard(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_harness_project(
+                root,
+                lean_toolchain="leanprover/lean4:v4.29.0",
+                verso_ref="v4.29.0",
+                math_lint_option="weak.verso.blueprint.math.lint",
+                warn_line_length_option="weak.verso.code.warnLineLength",
+                strict_external_code=True,
+                strict_external_code_option="weak.verso.blueprint.externalCode.strictResolve",
+                lake_strict_external_code=True,
+            )
+            write_file(
+                root / "scripts" / "ci-pages.sh",
+                "#!/usr/bin/env bash\nlake build +BlueprintMain\n",
+                executable=True,
+            )
+            result = run_check(root)
+            self.assertEqual(result.returncode, 1, msg=result.stdout + result.stderr)
+            self.assertIn("dependency cache guard", result.stdout)
 
     def test_check_harness_rejects_ci_pages_executable_target(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

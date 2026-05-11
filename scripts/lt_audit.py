@@ -414,6 +414,25 @@ def main() -> int:
     math_script = str(SCRIPT_DIR / "check_verso_math_delimiters.py")
     heading_script = str(SCRIPT_DIR / "check_blueprint_heading_structure.py")
     source_metadata_script = str(SCRIPT_DIR / "check_source_authorized_metadata.py")
+    cache_guard_script = str(SCRIPT_DIR / "ensure_dependency_cache.py")
+
+    if not args.no_build or args.pages:
+        print("\n== dependency cache")
+        cache_result = run_step(
+            project_root,
+            "dependency cache guard",
+            [
+                sys.executable,
+                cache_guard_script,
+                "--project-root",
+                str(project_root),
+                "--warm-cache",
+            ],
+        )
+        print_step(cache_result)
+        if not cache_result.ok:
+            print("\nOverall: FAIL")
+            return 1
 
     for path in paths:
         print(f"\n== {path}")

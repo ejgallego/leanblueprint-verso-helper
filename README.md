@@ -90,6 +90,11 @@ python3 tools/verso-harness/scripts/lt_audit.py --project-root . --native-warnin
 python3 tools/verso-harness/scripts/status_completion.py --project-root . --build
 ```
 
+Any helper path that runs `lake build`, including generated `scripts/ci-pages.sh`
+and `lt_audit.py` chapter builds, first runs the dependency-cache guard. The
+guard fetches the mathlib cache and refuses to continue if mathlib artifacts are
+still incomplete, so a site smoke cannot silently compile mathlib.
+
 ## More Detailed Docs
 
 Start a new port from an empty directory:
