@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -14,6 +16,12 @@ GUARDED_MODULE_ROOTS = {
     "mathlib": ("Mathlib",),
 }
 REQUIRED_ARTIFACT_SUFFIXES = (".olean", ".trace", ".olean.hash")
+CACHED_LEAN_ARTIFACT_SUFFIXES = (
+    ".olean.private",
+    ".olean.server",
+    ".olean",
+    ".ilean",
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -115,6 +123,80 @@ def dependency_artifact_gaps(project_root: Path) -> list[str]:
     return gaps
 
 
+def lake_cache_artifacts_dir() -> Path | None:
+    lake_path = shutil.which("lake")
+    if lake_path is None:
+        return None
+    try:
+        toolchain_root = Path(lake_path).resolve().parents[1]
+    except IndexError:
+        return None
+    return toolchain_root / "lake" / "cache" / "artifacts"
+
+
+def trace_output_artifacts(trace_path: Path) -> list[str]:
+    try:
+        data = json.loads(trace_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    outputs = data.get("outputs")
+    if not isinstance(outputs, dict):
+        return []
+    artifacts: list[str] = []
+    for value in outputs.values():
+        if isinstance(value, str):
+            artifacts.append(value)
+        elif isinstance(value, list):
+            artifacts.extend(item for item in value if isinstance(item, str))
+    return artifacts
+
+
+def local_artifact_path(trace_path: Path, cached_artifact_name: str) -> Path | None:
+    for suffix in CACHED_LEAN_ARTIFACT_SUFFIXES:
+        if cached_artifact_name.endswith(suffix):
+            return trace_path.with_suffix(suffix)
+    return None
+
+
+def link_or_copy(source: Path, target: Path) -> None:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        os.link(source, target)
+    except OSError:
+        shutil.copy2(source, target)
+
+
+def materialize_cached_lean_artifacts(
+    project_root: Path,
+    cache_artifacts_dir: Path | None = None,
+) -> list[Path]:
+    """Restore missing dependency Lean artifacts from Lake's content cache."""
+    cache_dir = (
+        cache_artifacts_dir
+        if cache_artifacts_dir is not None
+        else lake_cache_artifacts_dir()
+    )
+    if cache_dir is None or not cache_dir.exists():
+        return []
+
+    packages_root = project_root / ".lake" / "packages"
+    if not packages_root.exists():
+        return []
+
+    restored: list[Path] = []
+    for trace_path in packages_root.glob("*/.lake/build/lib/lean/**/*.trace"):
+        for artifact_name in trace_output_artifacts(trace_path):
+            target = local_artifact_path(trace_path, artifact_name)
+            if target is None or target.exists():
+                continue
+            source = cache_dir / artifact_name
+            if not source.is_file():
+                continue
+            link_or_copy(source, target)
+            restored.append(target)
+    return restored
+
+
 def warm_cache(project_root: Path) -> int:
     print(f"[dependency-cache] {' '.join(CACHE_GET_COMMAND)}", flush=True)
     return subprocess.run(list(CACHE_GET_COMMAND), cwd=project_root, check=False).returncode
@@ -127,6 +209,10 @@ def main() -> int:
         cache_status = warm_cache(project_root)
         if cache_status != 0:
             return cache_status
+
+    restored = materialize_cached_lean_artifacts(project_root)
+    if restored:
+        print(f"[dependency-cache] materialized {len(restored)} cached Lean artifact(s)")
 
     gaps = dependency_artifact_gaps(project_root)
     if gaps:

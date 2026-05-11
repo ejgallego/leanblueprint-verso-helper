@@ -58,6 +58,78 @@ class EnsureDependencyCacheTests(unittest.TestCase):
             gaps = ensure_dependency_cache.dependency_artifact_gaps(root)
         self.assertEqual(gaps, [])
 
+    def test_materializes_cached_lean_artifacts_from_dependency_trace(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "project"
+            cache = Path(tmp) / "cache"
+            trace = (
+                root
+                / ".lake"
+                / "packages"
+                / "verso"
+                / ".lake"
+                / "build"
+                / "lib"
+                / "lean"
+                / "VersoManual"
+                / "Basic.trace"
+            )
+            trace.parent.mkdir(parents=True)
+            cache.mkdir()
+            trace.write_text(
+                json.dumps(
+                    {
+                        "outputs": {
+                            "o": [
+                                "abc.olean",
+                                "def.olean.server",
+                                "ghi.olean.private",
+                            ],
+                            "i": "jkl.ilean",
+                            "c": "ignored.c",
+                            "m": False,
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            for artifact_name in [
+                "abc.olean",
+                "def.olean.server",
+                "ghi.olean.private",
+                "jkl.ilean",
+            ]:
+                (cache / artifact_name).write_text(artifact_name, encoding="utf-8")
+
+            restored = ensure_dependency_cache.materialize_cached_lean_artifacts(root, cache)
+
+            self.assertEqual(
+                sorted(path.name for path in restored),
+                [
+                    "Basic.ilean",
+                    "Basic.olean",
+                    "Basic.olean.private",
+                    "Basic.olean.server",
+                ],
+            )
+            self.assertEqual(
+                (trace.parent / "Basic.olean").read_text(encoding="utf-8"),
+                "abc.olean",
+            )
+            self.assertEqual(
+                (trace.parent / "Basic.olean.server").read_text(encoding="utf-8"),
+                "def.olean.server",
+            )
+            self.assertEqual(
+                (trace.parent / "Basic.olean.private").read_text(encoding="utf-8"),
+                "ghi.olean.private",
+            )
+            self.assertEqual(
+                (trace.parent / "Basic.ilean").read_text(encoding="utf-8"),
+                "jkl.ilean",
+            )
+            self.assertFalse((trace.parent / "Basic.c").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
