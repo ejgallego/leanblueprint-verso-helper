@@ -122,6 +122,18 @@ Alpha \Cref{bar,baz} \cref{quux}.
         self.assertEqual(score.soft_ref_hints, {"bar", "baz", "quux"})
         self.assertGreaterEqual(score.token_ratio, 0.99)
 
+    def test_section_refs_are_not_reported_as_blueprint_node_hints(self) -> None:
+        verso = verso_block("Alpha.", header="")
+        tex = tex_block(
+            r"""
+Alpha \cref{sec:overview}.
+""".strip()
+        )
+        score = score_pair(verso, tex)
+        self.assertEqual(score.tex_refs, {"sec:overview"})
+        self.assertEqual(score.soft_ref_hints, set())
+        self.assertEqual(score.ref_hint_count, 0)
+
     def test_bprefs_discharge_source_ref_hints_without_uses_edge(self) -> None:
         verso = verso_block('By theorem {bpref "bar"}[]. Alpha.')
         tex = tex_block(

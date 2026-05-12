@@ -19,11 +19,16 @@ from _harnesslib import resolve_chapter_paths, resolve_project_root  # noqa: E40
 from check_lt_source_pairs import Block, parse_blocks  # noqa: E402
 
 PLACEHOLDER_LEAN_TARGETS = {"???", "TODO", "TBD", "FIXME"}
+NON_BLUEPRINT_REF_PREFIXES = ("sec:",)
 
 
 def looks_like_placeholder_lean_target(target: str) -> bool:
     stripped = target.strip()
     return stripped in PLACEHOLDER_LEAN_TARGETS or stripped.endswith("_placeholder")
+
+
+def looks_like_non_blueprint_ref(target: str) -> bool:
+    return target.strip().startswith(NON_BLUEPRINT_REF_PREFIXES)
 
 
 @dataclass
@@ -81,7 +86,14 @@ class PairScore:
 
     @property
     def unresolved_ref_hints(self) -> set[str]:
-        return self.tex_refs - self.tex_uses - self.tex_lean - self.verso_uses - self.verso_bprefs
+        candidates = (
+            self.tex_refs
+            - self.tex_uses
+            - self.tex_lean
+            - self.verso_uses
+            - self.verso_bprefs
+        )
+        return {ref for ref in candidates if not looks_like_non_blueprint_ref(ref)}
 
     @property
     def pure_metadata_diff_count(self) -> int:
